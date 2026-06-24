@@ -1,8 +1,19 @@
 import React, { forwardRef, useId } from "react";
 import "./CInput.css";
 
-const Input = forwardRef(
-  ({ label, error, id, className = "", type = "text", ...props }, ref) => {
+const Select = forwardRef(
+  (
+    {
+      label,
+      error,
+      id,
+      className = "",
+      options = [], // formato: [{ value: '1', label: 'Opción 1' }, ...]
+      placeholder = "Selecciona una opción",
+      ...props
+    },
+    ref,
+  ) => {
     const generatedId = useId();
     const inputId = id || generatedId;
 
@@ -23,14 +34,24 @@ const Input = forwardRef(
           </label>
         )}
 
-        {/* Campo de entrada */}
-        <input
+        {/* Campo select */}
+        <select
           id={inputId}
           ref={ref}
-          type={type}
-          className={`input-field ${error ? "has-error" : ""}`}
+          className={`input-field select-field ${error ? "has-error" : ""}`}
           {...props}
-        />
+        >
+          {placeholder && (
+            <option value="" disabled hidden>
+              {placeholder}
+            </option>
+          )}
+          {options.map((option, index) => (
+            <option key={index} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
 
         {/* Mensaje de error */}
         {error && <span className="input-error-text">{error}</span>}
@@ -39,6 +60,6 @@ const Input = forwardRef(
   },
 );
 
-Input.displayName = "Input";
+Select.displayName = "Select";
 
-export default Input;
+export default Select;

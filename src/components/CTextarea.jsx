@@ -1,8 +1,8 @@
 import React, { forwardRef, useId } from "react";
 import "./CInput.css";
 
-const Input = forwardRef(
-  ({ label, error, id, className = "", type = "text", ...props }, ref) => {
+const Textarea = forwardRef(
+  ({ label, error, id, className = "", ...props }, ref) => {
     const generatedId = useId();
     const inputId = id || generatedId;
 
@@ -23,12 +23,11 @@ const Input = forwardRef(
           </label>
         )}
 
-        {/* Campo de entrada */}
-        <input
+        {/* Campo de texto multilínea */}
+        <textarea
           id={inputId}
           ref={ref}
-          type={type}
-          className={`input-field ${error ? "has-error" : ""}`}
+          className={`input-field textarea-field ${error ? "has-error" : ""}`}
           {...props}
         />
 
@@ -39,6 +38,6 @@ const Input = forwardRef(
   },
 );
 
-Input.displayName = "Input";
+Textarea.displayName = "Textarea";
 
-export default Input;
+export default Textarea;
