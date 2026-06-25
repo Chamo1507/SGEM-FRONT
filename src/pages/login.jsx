@@ -1,9 +1,14 @@
 import { useState } from "react";
 import "./login.css";
+import { useNavigate } from "react-router-dom";
+
+import maxSgmLogo from "../assets/brand/MAX-SGM.png";
 
 const Login = () => {
   const [form, setForm] = useState({ email: "", password: "" });
   const [remember, setRemember] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target;
@@ -18,12 +23,20 @@ const Login = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    
+    if (!form.email.trim().toLowerCase().endsWith("@umad.edu.mx")) {
+      setError("Por favor, utiliza tu correo institucional (@umad.edu.mx)");
+      return;
+    }
+    
+    setError("");
     console.log("Intento de login:", form, { remember });
-    alert(`Ingresando como ${form.email}`);
+    navigate("/");
   };
 
   return (
     <div className="login-page">
+      <img src={maxSgmLogo} alt="MAX SGM" className="login-max-page-bg" />
       <div className="login-container">
         <div className="login-branding">
           <div className="branding-content">
@@ -38,6 +51,7 @@ const Login = () => {
           </div>
 
           <form className="login-form" onSubmit={handleSubmit}>
+            {error && <div className="login-error">{error}</div>}
             <div className="input-group">
               <label htmlFor="email">Correo electrónico</label>
               <input

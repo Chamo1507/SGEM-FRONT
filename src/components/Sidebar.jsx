@@ -1,56 +1,82 @@
 import { useState } from "react";
 import "./Sidebar.css";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import logoImg from "../assets/brand/cropped-UMAD-512X512bb-1-192x192.png";
+import {
+  CalendarIcon as Calendar,
+  CalendarPlusIcon as CalendarPlus,
+  UsersIcon as Users,
+  LayoutDashboardIcon as LayoutDashboard,
+  SettingsIcon as Settings,
+  LogOutIcon as LogOut,
+  ChevronDownIcon as ChevronDown,
+  HomeIcon as Home,
+} from "./Icons";
 
 const Sidebar = () => {
   const [isEventsOpen, setIsEventsOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const navigate = useNavigate();
 
   return (
-    <aside className="sidebar">
-      <div className="sidebar-header">
-        <h2 className="sidebar-logo">SGM</h2>
+    <aside className={`sidebar ${isCollapsed ? "collapsed" : ""}`}>
+      <div
+        className="sidebar-header"
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        style={{ cursor: "pointer" }}
+      >
         <img
-          src="./src/assets/brand/cropped-UMAD-512X512bb-1-192x192.png"
+          src={logoImg}
           alt="Logo"
           className="sidebar-logo-image"
+          title="Toggle Sidebar"
         />
+        <h2 className="sidebar-logo">SGM</h2>
       </div>
 
       <nav className="sidebar-nav">
         <ul>
+          <li>
+            <NavLink
+              to="/"
+              className={({ isActive }) =>
+                isActive ? "nav-item active" : "nav-item"
+              }
+            >
+              <div className="nav-item-content">
+                <Home className="icon" size={24} />
+                <span className="nav-text">Inicio</span>
+              </div>
+            </NavLink>
+          </li>
+
           {/* Menú Desplegable de Eventos */}
           <li className="nav-group">
             <div
               className={`nav-item has-dropdown ${isEventsOpen ? "open" : ""}`}
-              onClick={() => setIsEventsOpen(!isEventsOpen)}
+              onClick={() => {
+                if (isCollapsed) setIsCollapsed(false);
+                setIsEventsOpen(!isEventsOpen);
+              }}
             >
               <div className="nav-item-content">
-                <span className="icon"></span>
-                Eventos
+                <Calendar className="icon" size={24} />
+                <span className="nav-text">Eventos</span>
               </div>
-              <span className="dropdown-arrow">▼</span>
+              <ChevronDown className="dropdown-arrow" size={16} />
             </div>
 
             {isEventsOpen && (
               <ul className="dropdown-menu">
                 <li>
                   <NavLink
-                    to="/eventos/registro"
+                    to="/eventos/proximos"
                     className={({ isActive }) =>
                       isActive ? "dropdown-item active" : "dropdown-item"
                     }
                   >
-                    Registro eventos
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to="/eventos/invitados"
-                    className={({ isActive }) =>
-                      isActive ? "dropdown-item active" : "dropdown-item"
-                    }
-                  >
-                    Registro invitados
+                    <CalendarPlus size={18} className="dropdown-icon" />
+                    <span className="nav-text">Eventos</span>
                   </NavLink>
                 </li>
                 <li>
@@ -60,7 +86,8 @@ const Sidebar = () => {
                       isActive ? "dropdown-item active" : "dropdown-item"
                     }
                   >
-                    Dashboard
+                    <LayoutDashboard size={18} className="dropdown-icon" />
+                    <span className="nav-text">Dashboard</span>
                   </NavLink>
                 </li>
               </ul>
@@ -74,17 +101,19 @@ const Sidebar = () => {
                 isActive ? "nav-item active" : "nav-item"
               }
             >
-              <span className="icon"></span>
-              Configuración
+              <div className="nav-item-content">
+                <Settings className="icon" size={24} />
+                <span className="nav-text">Configuración</span>
+              </div>
             </NavLink>
           </li>
         </ul>
       </nav>
 
       <div className="sidebar-footer">
-        <button className="logout-btn">
-          <span className="icon"></span>
-          Cerrar Sesión
+        <button className="logout-btn" onClick={() => navigate("/login")}>
+          <LogOut className="icon" size={24} />
+          <span className="nav-text">Cerrar Sesión</span>
         </button>
       </div>
     </aside>
