@@ -1,8 +1,8 @@
 const Home = () => {
   return (
-    <div>
+    <div style={{ padding: '32px' }}>
       <h1>Inicio</h1>
-      <p>Bienvenido a la página de inicio.</p>
+      <p>Bienvenido al sistema SGEM.</p>
     </div>
   );
 };
