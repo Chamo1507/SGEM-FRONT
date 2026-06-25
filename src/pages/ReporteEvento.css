@@ -1,0 +1,129 @@
+.report-container {
+  padding: 40px;
+  background: white;
+  min-height: 100vh;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  color: #0c1c3e;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.report-header {
+  border-bottom: 2px solid var(--umad-red, #a81934);
+  padding-bottom: 20px;
+  margin-bottom: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.report-title h1 {
+  margin: 0;
+  font-size: 2.5rem;
+  color: var(--umad-blue, #0c1c3e);
+  font-weight: 800;
+}
+
+.report-title p {
+  color: #64748b;
+  margin: 8px 0 0 0;
+  font-size: 1.1rem;
+}
+
+.report-actions button {
+  background: var(--umad-red, #a81934);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s;
+  box-shadow: 0 4px 12px rgba(168, 25, 52, 0.2);
+}
+
+.report-actions button:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+.report-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+.info-card {
+  background: #f8fafc;
+  padding: 32px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+}
+
+.info-card h3 {
+  margin-top: 0;
+  color: var(--umad-red, #a81934);
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.info-item {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px dashed #cbd5e1;
+  padding-bottom: 8px;
+}
+
+.info-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #64748b;
+}
+
+.info-value {
+  font-weight: 600;
+  color: var(--umad-blue, #0c1c3e);
+  text-align: right;
+}
+
+.info-description {
+  line-height: 1.6;
+  color: #475569;
+  font-size: 1.05rem;
+}
+
+/* Print Styles */
+@media print {
+  .report-container {
+    padding: 0;
+    margin: 0;
+  }
+  .report-actions {
+    display: none !important;
+  }
+  /* Hide the sidebar from MainLayout during print */
+  aside.sidebar {
+    display: none !important;
+  }
+  main.main-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  body, html {
+    background: white;
+  }
+  .info-card {
+    border: 1px solid #94a3b8;
+    background: white;
+  }
+}
