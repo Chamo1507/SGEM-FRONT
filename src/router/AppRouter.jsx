@@ -3,7 +3,6 @@ import Login from "../pages/login";
 import Home from "../pages/Home";
 import Configuracion from "../pages/Configuracion";
 import MainLayout from "../layout/MainLayout";
-import Home from "../pages/Home";
 import ProximosEventos from "../pages/ProximosEventos";
 
 const AppRouter = () => {
