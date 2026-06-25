@@ -1,0 +1,234 @@
+.sidebar {
+  width: 280px;
+  height: 100vh;
+  background-color: var(--umad-white, #ffffff);
+  color: var(--umad-blue, #0c1c3e);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 4px 0 24px rgba(12, 28, 62, 0.15);
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    sans-serif;
+  position: sticky;
+  top: 0;
+  border-right: 3.5px solid var(--umad-blue, #0c1c3e);
+  transition: width 0.3s ease;
+  overflow: hidden;
+}
+
+.sidebar-logo-image {
+  margin-right: 12px;
+  height: 80px;
+}
+
+.sidebar-header {
+  padding: 32px 24px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(12, 28, 62, 0.08);
+  border-bottom-left-radius: 16px;
+  transition: padding 0.3s ease;
+}
+
+.sidebar-logo {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--umad-blue);
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 32px 16px;
+  overflow-y: auto;
+}
+
+.sidebar-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  color: rgba(12, 28, 62, 0.65);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1.05rem;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.nav-item-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.nav-item .icon {
+  transition: transform 0.2s ease;
+}
+
+.nav-item:hover {
+  background-color: rgba(12, 28, 62, 0.05);
+  color: var(--umad-blue);
+}
+
+.nav-item:hover .icon {
+  transform: translateX(4px) scale(1.1);
+}
+
+.nav-item.active {
+  background-color: var(--umad-red);
+  color: var(--umad-white);
+  font-weight: 600;
+  box-shadow: 0 4px 16px rgba(168, 25, 52, 0.35);
+}
+
+/* Dropdown Styles */
+.has-dropdown {
+  cursor: pointer;
+  user-select: none;
+}
+
+.dropdown-arrow {
+  transition: transform 0.3s ease;
+  opacity: 0.7;
+}
+
+.has-dropdown.open .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.dropdown-menu {
+  list-style: none;
+  padding: 8px 0 0 46px !important; /* Indent to align with text */
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px !important;
+  animation: slide-down 0.2s ease-out;
+  transform-origin: top;
+}
+
+@keyframes slide-down {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  color: rgba(12, 28, 62, 0.6);
+  text-decoration: none;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background-color: rgba(12, 28, 62, 0.05);
+  color: var(--umad-blue);
+  padding-left: 22px; /* Smooth sliding effect */
+}
+
+.dropdown-item.active {
+  color: var(--umad-blue);
+  font-weight: 600;
+  background-color: rgba(12, 28, 62, 0.05);
+}
+
+/* Removed red dot for active dropdown item */
+
+/* Footer */
+.sidebar-footer {
+  padding: 24px 16px;
+  border-top: 1px solid rgba(12, 28, 62, 0.08);
+}
+
+.logout-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 14px;
+  padding: 14px 18px;
+  background: transparent;
+  border: none;
+  color: rgba(12, 28, 62, 0.65);
+  font-size: 1.05rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.logout-btn:hover {
+  background-color: rgba(12, 28, 62, 0.05);
+  color: var(--umad-blue);
+}
+
+/* Collapsed Sidebar Styles */
+.sidebar.collapsed {
+  width: 88px;
+}
+
+.sidebar.collapsed .sidebar-header {
+  padding: 32px 0;
+  justify-content: center;
+}
+
+.sidebar.collapsed .sidebar-logo-image {
+  margin-right: 0;
+  height: 48px;
+  transition: all 0.3s ease;
+}
+
+.sidebar.collapsed .sidebar-logo,
+.sidebar.collapsed .nav-text,
+.sidebar.collapsed .dropdown-arrow {
+  display: none;
+}
+
+.sidebar.collapsed .nav-item {
+  justify-content: center;
+  padding: 14px 0;
+}
+
+.sidebar.collapsed .nav-item-content {
+  gap: 0;
+}
+
+.sidebar.collapsed .dropdown-menu {
+  display: none;
+}
+
+.sidebar.collapsed .logout-btn {
+  justify-content: center;
+  padding: 14px 0;
+}
+
+.sidebar.collapsed .sidebar-footer {
+  padding: 24px 0;
+}
+
+.dropdown-icon {
+  margin-right: 12px;
+}

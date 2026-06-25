@@ -1,9 +1,8 @@
-import { useState } from 'react'
-import './App.css'
+
+import { AppRouter } from "./router/AppRouter";
 
 function App() {
-  return (
-  )
+  return <AppRouter />;
 }
 
-export default App
+export default App;
