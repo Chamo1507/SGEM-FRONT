@@ -26,7 +26,7 @@ const Select = forwardRef(
             {props.required && (
               <span
                 className="required-asterisk"
-                style={{ color: "red", marginLeft: "4px" }}
+                style={{ color: "black", marginLeft: "4px" }}
               >
                 *
               </span>
