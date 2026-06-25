@@ -11,14 +11,13 @@ const AppRouter = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<MainLayout />}>
-          <Route index element={<Home />} />
-          <Route path="eventos/dashboard" element={<Dashboard />} />
-          <Route path="eventos/reporte/:id" element={<ReporteEvento />} />
         <Route path="/login" element={<Login />} />
         <Route element={<MainLayout />}>
+          <Route path="/" element={<Home />} />
           <Route path="/configuracion" element={<Configuracion />} />
           <Route path="/eventos/proximos" element={<ProximosEventos />} />
+          <Route path="/eventos/dashboard" element={<Dashboard />} />
+          <Route path="/eventos/reporte/:id" element={<ReporteEvento />} />
         </Route>
       </Routes>
     </BrowserRouter>
