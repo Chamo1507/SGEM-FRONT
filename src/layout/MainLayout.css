@@ -1,0 +1,13 @@
+.main-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f4f7f6;
+}
+
+.main-content {
+  flex: 1;
+  padding: 32px;
+  height: 100vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
