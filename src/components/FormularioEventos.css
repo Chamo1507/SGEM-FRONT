@@ -33,7 +33,7 @@
 
 @media (min-width: 1024px) {
   .form-sections-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
   }
 }
 
@@ -50,6 +50,7 @@
   font-size: 1.1rem;
   border-bottom: 2px solid rgba(168, 25, 52, 0.1);
   padding-bottom: 8px;
+  text-align: center;
 }
 
 .form-row {
