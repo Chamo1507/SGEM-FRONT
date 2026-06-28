@@ -25,16 +25,10 @@
 }
 
 .form-sections-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* Ajusta este número para acercar o alejar las secciones */
   margin-bottom: 32px;
-}
-
-@media (min-width: 1024px) {
-  .form-sections-grid {
-    grid-template-rows: repeat(3, 1fr);
-  }
 }
 
 .form-section {
@@ -42,6 +36,7 @@
   padding: 24px;
   border-radius: 12px;
   border: 1px solid #f1f5f9;
+  height: auto; /* Ajusta la altura automáticamente según el contenido */
 }
 
 .section-title-wrap h3 {
@@ -59,6 +54,57 @@
   gap: 16px;
 }
 
+.two-cards-grid {
+  display: flex; /* Cambiamos de grid a flex */
+  flex-direction: column; /* Esto es lo que las apila verticalmente */
+  gap: 16px;
+  width: 100%;
+}
+
+.Fecha-wrapper {
+  display: grid;
+  grid-template-columns: 1fr; /* Una sola columna para celular */
+  gap: 24px; /* Espacio entre el calendario y los inputs */
+  margin-bottom: 16px;
+}
+
+.FechaHoraInputs {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  align-content: start;
+}
+
+.text-center {
+  display: block;
+  text-align: center;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .two-cards-grid {
+    display: grid;
+    /* La tarjeta del calendario toma un tamaño fijo ideal, 
+       y la tarjeta de inputs toma el resto del espacio */
+    grid-template-columns: 340px 1fr;
+    align-items: stretch; /* Hace que ambas tarjetas tengan la misma altura */
+  }
+  .Fecha-wrapper {
+    /* Columna 1 (Calendario): 320px fijos para que no se deforme.
+       Columna 2 (Inputs): 1fr para que ocupe todo el espacio restante. */
+    grid-template-columns: 320px 1fr;
+    align-items: start;
+    height: 100%; /* Asegura que la altura de la sección sea consistente */
+  }
+
+  .FechaHoraInputs {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0px;
+    height: 100%; /* Ocupa toda la altura de la tarjeta */
+    align-content: start; /* Mantiene los inputs arriba si sobra mucho espacio */
+  }
+}
 .checkbox-group h4 {
   color: #475569;
   margin: 0 0 12px 0;
@@ -80,4 +126,74 @@
   justify-content: flex-end;
   border-top: 1px solid #e2e8f0;
   padding-top: 24px;
+}
+
+/* 1. Evitar que el calendario se estire y centrarlo */
+.calendario-wrapper {
+  display: flex;
+  justify-content: center; /* Cambia a flex-start si lo prefieres alineado a la izquierda */
+  width: 100%;
+  height: fit-content;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+/* 2. Estilizar la caja principal del calendario */
+.calendario-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Evita que se estire verticalmente */
+  width: 100%;
+  flex-grow: 0;
+}
+
+.calendario-wrapper .react-datepicker {
+  transform: scale(
+    1.2
+  ); /* Ajusta este valor (ej. 0.8 para más pequeño, 1.1 para más grande) */
+  transform-origin: top center;
+}
+
+/* 3. Estilizar la cabecera (Mes y flechas) */
+.calendario-wrapper .react-datepicker__header {
+  background-color: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  padding-top: 12px;
+}
+
+/* Color del texto del mes actual */
+.calendario-wrapper .react-datepicker__current-month {
+  color: var(--umad-blue, #0c1c3e);
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+/* Color de los días de la semana */
+.calendario-wrapper .react-datepicker__day-name {
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* 4. Estilizar los días y la selección */
+.calendario-wrapper .react-datepicker__day {
+  color: #374151;
+  border-radius: 6px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+/* Hover sobre los días */
+.calendario-wrapper .react-datepicker__day:hover {
+  background-color: rgba(12, 28, 62, 0.1);
+  border-radius: 6px;
+}
+
+/* Día seleccionado (usando tu color azul) */
+.calendario-wrapper .react-datepicker__day--selected,
+.calendario-wrapper .react-datepicker__day--keyboard-selected {
+  background-color: var(--umad-blue, #0c1c3e) !important;
+  color: #ffffff !important;
+  font-weight: bold;
+  border-radius: 6px;
 }

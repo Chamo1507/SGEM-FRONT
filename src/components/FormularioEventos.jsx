@@ -1,5 +1,7 @@
 import React, { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import Form from "./CFormulario";
 import Input from "./CInput";
 import Select from "./CSelect";
@@ -14,6 +16,7 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -150,35 +153,22 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
             />
 
             <Input
-              label="Fecha"
-              type="date"
+              label="Publico Objetivo"
+              placeholder="Ej.: Estudiantes de Ingeniería"
               required={true}
-              error={errors.fecha?.message}
-              {...register("fecha", { required: "Requerida" })}
-            />
-            <Input
-              label="Hora de Inicio"
-              type="time"
-              required={true}
-              error={errors.horaIni?.message}
-              {...register("hora", { required: "Requerida" })}
+              error={errors.publico?.message}
+              {...register("publico", {
+                required: "El público es obligatorio",
+              })}
             />
 
             <Input
-              label="Fin del Evento"
-              type="time"
+              label="Autoridades Asistentes"
+              placeholder="Ej.: Coordinador de Carrera, Director de Plantel"
               required={true}
-              error={errors.horaFin?.message}
-              {...register("horaFin", { required: "Requerida" })}
-            />
-
-            <Input
-              label="Objetivo Académico"
-              placeholder="Ej.: Promover el conocimiento"
-              required={true}
-              error={errors.objetivo?.message}
-              {...register("objetivo", {
-                required: "El objetivo es obligatorio",
+              error={errors.autoridades?.message}
+              {...register("autoridades", {
+                required: "Las autoridades son obligatorias",
               })}
             />
 
@@ -193,41 +183,117 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
             />
           </section>
 
+          {/* SECCIÓN 2: Fecha y Lugar en Tarjetas Separadas */}
+          <div className="two-cards-grid">
+            {/* TARJETA IZQUIERDA: Calendario */}
+            <section className="form-section">
+              <div className="section-title-wrap">
+                <h3>Fecha del Evento</h3>
+              </div>
+              <div className="calendario-wrapper">
+                <Controller
+                  control={control}
+                  name="fecha"
+                  rules={{ required: "La fecha es requerida" }}
+                  render={({ field }) => (
+                    <DatePicker
+                      selected={field.value ? new Date(field.value) : null}
+                      onChange={(date) => field.onChange(date)}
+                      inline
+                    />
+                  )}
+                />
+              </div>
+              {errors.fecha && (
+                <span className="input-error-text text-center">
+                  {errors.fecha.message}
+                </span>
+              )}
+            </section>
+
+            {/* TARJETA DERECHA: Horarios y Lugar */}
+            <section className="form-section">
+              <div className="section-title-wrap">
+                <h3>Lugar y Horarios</h3>
+              </div>
+              <div className="FechaHoraInputs">
+                <Input
+                  label="Hora de Inicio"
+                  type="time"
+                  required={true}
+                  error={errors.hora?.message}
+                  {...register("hora", { required: "Requerida" })}
+                />
+                <Input
+                  label="Fin del Evento"
+                  type="time"
+                  required={true}
+                  error={errors.horaFin?.message}
+                  {...register("horaFin", { required: "Requerida" })}
+                />
+                <Input
+                  label="Plantel del Evento"
+                  placeholder="Ej.: Plantel Centro"
+                  required={true}
+                  error={errors.plantel?.message}
+                  {...register("plantel", {
+                    required: "El plantel es obligatorio",
+                  })}
+                />
+                <Input
+                  label="Área a utilizar"
+                  placeholder="Ej.: Auditorio Principal"
+                  required={true}
+                  error={errors.area?.message}
+                  {...register("area", {
+                    required: "El área es obligatoria",
+                  })}
+                />
+              </div>
+            </section>
+          </div>
+
           {/* SECCIÓN 2: Configuración y Responsables */}
           <section className="form-section">
             <div className="section-title-wrap">
-              <h3>Configuración y Responsables</h3>
+              <h3>Objetivo de la cobertura</h3>
             </div>
 
-            <div className="form-row">
-              <Select
-                label="Prioridad"
-                options={opcPrioridad}
-                required={true}
-                error={errors.prioridad?.message}
-                {...register("prioridad", { required: "Requerido" })}
-              />
-              <Select
-                label="Estatus"
-                options={opcEstatus}
-                required={true}
-                error={errors.estatus?.message}
-                {...register("estatus", { required: "Requerido" })}
-              />
-            </div>
+            <Input
+              label="Objetivo Académico"
+              placeholder="Ej.: Promover el conocimiento"
+              required={true}
+              error={errors.objetivo?.message}
+              {...register("objetivo", {
+                required: "El objetivo es obligatorio",
+              })}
+            />
 
-            <div className="form-row">
-              <Select
-                label="Proveedor"
-                options={opcProveedores}
-                required={true}
-                error={errors.proveedor?.message}
-                {...register("proveedor", { required: "Requerido" })}
-              />
-            </div>
+            <Select
+              label="Prioridad"
+              options={opcPrioridad}
+              required={true}
+              error={errors.prioridad?.message}
+              {...register("prioridad", { required: "Requerido" })}
+            />
+            <Select
+              label="Estatus"
+              options={opcEstatus}
+              required={true}
+              error={errors.estatus?.message}
+              {...register("estatus", { required: "Requerido" })}
+            />
+
+            <Select
+              label="Proveedor"
+              options={opcProveedores}
+              required={true}
+              error={errors.proveedor?.message}
+              {...register("proveedor", { required: "Requerido" })}
+            />
           </section>
 
-          {/* SECCIÓN 3: Fecha, Hora y Requisitos */}
+          {/* SECCIÓN 3: Fecha, Hora */}
           <section className="form-section">
             <div className="section-title-wrap">
               <h3>Fecha y Requisitos</h3>
