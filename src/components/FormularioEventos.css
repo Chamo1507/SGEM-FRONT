@@ -1,0 +1,82 @@
+.formulario-eventos-wrapper {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 10px 30px rgba(12, 28, 62, 0.05);
+  border: 1px solid rgba(12, 28, 62, 0.08);
+  font-family: "Inter", sans-serif;
+}
+
+.formulario-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.formulario-header h2 {
+  color: var(--umad-blue, #0c1c3e);
+  margin: 0 0 8px 0;
+  font-size: 1.5rem;
+}
+
+.formulario-header p {
+  color: #64748b;
+  margin: 0;
+}
+
+.form-sections-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+  margin-bottom: 32px;
+}
+
+@media (min-width: 1024px) {
+  .form-sections-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.form-section {
+  background: #f8fafc;
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid #f1f5f9;
+}
+
+.section-title-wrap h3 {
+  color: var(--umad-red, #a81934);
+  margin: 0 0 20px 0;
+  font-size: 1.1rem;
+  border-bottom: 2px solid rgba(168, 25, 52, 0.1);
+  padding-bottom: 8px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.checkbox-group h4 {
+  color: #475569;
+  margin: 0 0 12px 0;
+  font-size: 0.95rem;
+}
+
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.mt-3 {
+  margin-top: 24px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 24px;
+}

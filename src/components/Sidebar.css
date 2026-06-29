@@ -158,9 +158,54 @@
 
 /* Footer */
 .sidebar-footer {
-  padding: 24px 16px;
-  border-top: 1px solid rgba(12, 28, 62, 0.08);
+  padding: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  margin-bottom: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.user-avatar {
+  background: rgba(255, 255, 255, 0.2);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: white;
+  white-space: nowrap;
+}
+
+.collapsed .user-profile {
+  padding: 8px;
+  justify-content: center;
+}
+
+.collapsed .user-info {
+  display: none;
+}
+
 
 .logout-btn {
   width: 100%;

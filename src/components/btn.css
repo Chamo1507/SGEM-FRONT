@@ -1,0 +1,24 @@
+.btn-formulario {
+  width: 40%;
+  box-sizing: border-box;
+  padding: 10px;
+  background-color: #943636;
+  color: #fff;
+  border: 2px solid #943636;
+  border-radius: 10px;
+  font-size: 16px;
+  font-family: "Balthazar", serif;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.btn-formulario:hover {
+  background-color: #7a2a2a;
+  transform: translateY(-1px);
+}
+
+.btn-formulario:active {
+  transform: translateY(0);
+}
