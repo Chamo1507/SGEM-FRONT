@@ -90,6 +90,39 @@ const Sidebar = () => {
                     <span className="nav-text">Dashboard</span>
                   </NavLink>
                 </li>
+                <li>
+                  <NavLink
+                    to="/eventos/confirmar"
+                    className={({ isActive }) =>
+                      isActive ? "dropdown-item active" : "dropdown-item"
+                    }
+                  >
+                    <Users size={18} className="dropdown-icon" />
+                    <span className="nav-text">Asistencia</span>
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink
+                    to="/eventos/encuesta-invitado"
+                    className={({ isActive }) =>
+                      isActive ? "dropdown-item active" : "dropdown-item"
+                    }
+                  >
+                    <Users size={18} className="dropdown-icon" />
+                    <span className="nav-text">Encuesta Invitado</span>
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink
+                    to="/eventos/encuesta-organizador"
+                    className={({ isActive }) =>
+                      isActive ? "dropdown-item active" : "dropdown-item"
+                    }
+                  >
+                    <Settings size={18} className="dropdown-icon" />
+                    <span className="nav-text">Encuesta Organizador</span>
+                  </NavLink>
+                </li>
               </ul>
             )}
           </li>
@@ -111,6 +144,14 @@ const Sidebar = () => {
       </nav>
 
       <div className="sidebar-footer">
+        <div className="user-profile">
+          <div className="user-avatar">
+            <Users className="icon" size={20} />
+          </div>
+          <div className="user-info">
+            <span className="nav-text user-name">Admin SGEM</span>
+          </div>
+        </div>
         <button className="logout-btn" onClick={() => navigate("/login")}>
           <LogOut className="icon" size={24} />
           <span className="nav-text">Cerrar Sesión</span>
