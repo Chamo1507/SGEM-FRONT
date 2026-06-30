@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -7,6 +7,7 @@ import Input from "./CInput";
 import Select from "./CSelect";
 import Textarea from "./CTextarea";
 import Btn from "./btn";
+import axios from "axios";
 import "./CFormulario.css";
 import "./CInput.css";
 import "./FormularioEventos.css";
@@ -25,15 +26,53 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
       comentarios: "",
       objetivo: "",
       prioridad: "",
-      estatus: "",
-      organizador: "",
-      proveedor: "",
+      estatus: "pendiente",
+      responsable: "",
+      proveedoresIds: [],
       fecha: "",
       hora: "",
+      horaApartado: "",
+      horaFin: "",
+      plantel: "",
+      area: "",
+      nuevoProveedorNombre: "",
+      nuevoProveedorCorreo: "",
     },
   });
 
+  const [opcPlanteles, setOpcPlanteles] = useState([]);
+  const [opcAreas, setOpcAreas] = useState([]);
+  const [opcProveedores, setOpcProveedores] = useState([]);
+  const [isAdmin, setIsAdmin] = useState(false);
+
   useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    if (user.id_rol === 1) setIsAdmin(true);
+
+    const fetchData = async () => {
+      try {
+        const [plantelesRes, espaciosRes, provsRes] = await Promise.all([
+          axios.get(`${import.meta.env.VITE_API_URL}/planteles`),
+          axios.get(`${import.meta.env.VITE_API_URL}/espacios`),
+          axios.get(`${import.meta.env.VITE_API_URL}/proveedores`),
+        ]);
+        
+        let pOptions = plantelesRes.data.map(p => ({ value: p.nombre_plantel, label: p.nombre_plantel }));
+        setOpcPlanteles(pOptions);
+
+        let eOptions = espaciosRes.data.map(e => ({ value: e.nombre_espacio, label: e.nombre_espacio }));
+        setOpcAreas(eOptions);
+        
+        setOpcProveedores(provsRes.data.map(p => ({ 
+          value: p.id_proveedor, 
+          label: p.nombre_proveedor 
+        })));
+      } catch (error) {
+        console.error("Error fetching form data:", error);
+      }
+    };
+    fetchData();
+
     if (eventoEditando) {
       reset(eventoEditando);
     } else {
@@ -42,43 +81,70 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
         comentarios: "",
         objetivo: "",
         prioridad: "",
-        estatus: "",
-        organizador: "",
-        proveedor: "",
+        estatus: "pendiente",
+        responsable: "",
+        proveedoresIds: [],
         fecha: "",
         hora: "",
+        horaApartado: "",
+        horaFin: "",
+        plantel: "",
+        area: "",
+        nuevoProveedorNombre: "",
+        nuevoProveedorCorreo: "",
       });
     }
   }, [eventoEditando, reset]);
 
-  const handleFormSubmit = (data) => {
-    const eventoAGuardar = {
-      ...data,
-      id: eventoEditando ? eventoEditando.id : Date.now(),
-    };
+  const handleFormSubmit = async (data) => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      const google_calendar_id = user?.google_calendar_id;
 
-    if (onSaveEvento) {
-      onSaveEvento(eventoAGuardar);
+      // Check if admin is adding a new provider
+      let finalProveedoresIds = [...(data.proveedoresIds || [])];
+      if (isAdmin && data.nuevoProveedorNombre) {
+        const provRes = await axios.post(`${import.meta.env.VITE_API_URL}/proveedores`, {
+          nombre_proveedor: data.nuevoProveedorNombre,
+          correo_proveedor: data.nuevoProveedorCorreo || "",
+        });
+        finalProveedoresIds.push(provRes.data.id_proveedor);
+      }
+
+      let payload = {
+        ...data,
+        proveedoresIds: finalProveedoresIds,
+        id_usuario: user?.id_usuario || null,
+        google_calendar_id, 
+      };
+
+      if (eventoEditando) {
+        // await axios.put(`${import.meta.env.VITE_API_URL}/eventos/${eventoEditando.id}`, payload);
+      } else {
+        await axios.post(`${import.meta.env.VITE_API_URL}/eventos`, payload);
+      }
+
+      if (onSaveEvento) {
+        onSaveEvento();
+      }
+
+      alert(eventoEditando ? "¡Evento actualizado con éxito!" : "¡Evento registrado con éxito!");
+      reset(); 
+    } catch (error) {
+      console.error(error);
+      alert("Ocurrió un error al guardar el evento.");
     }
-
-    alert(
-      eventoEditando
-        ? "¡Evento actualizado con éxito!"
-        : "¡Evento registrado con éxito!",
-    );
-    reset(); // Limpia el formulario si es nuevo
   };
 
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "invitados", // Este será el nombre del array en tu objeto final
-  });
+  const onFormError = (validationErrors) => {
+    console.error("Errores de validación:", validationErrors);
+    const firstError = Object.values(validationErrors)[0];
+    if (firstError?.message) {
+      alert(`Por favor completa los campos requeridos: ${firstError.message}`);
+    }
+  };
 
-  const opcPrioridad = [
-    { value: "alta", label: "Alta" },
-    { value: "media", label: "Media" },
-    { value: "baja", label: "Baja" },
-  ];
+  const { fields, append, remove } = useFieldArray({ control, name: "invitados" });
 
   const opcEstatus = [
     { value: "confirmado", label: "Confirmado" },
@@ -87,38 +153,10 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
     { value: "en preparación", label: "En Preparación" },
   ];
 
-  const opcOrganizadores = [
-    { value: "org1", label: "Organizador 1" },
-    { value: "org2", label: "Organizador 2" },
-    { value: "org3", label: "Organizador 3" },
-  ];
-
-  const opcProveedores = [
-    { value: "prov1", label: "Proveedor 1" },
-    { value: "prov2", label: "Proveedor 2" },
-    { value: "prov3", label: "Proveedor 3" },
-  ];
-
-  const proveedorSeleccionado = watch("proveedor");
-
-  const materialesPorProveedor = {
-    prov1: ["Proyector", "Micrófono", "Sonido"],
-    prov2: ["Sillas", "Mesas", "Manteles"],
-    prov3: ["Iluminación", "Cámaras", "Trípodes"],
-  };
-
-  const opcMantenimiento = [
-    { value: "mant1", label: "pódium" },
-    { value: "mant2", label: "Mesas" },
-    { value: "mant3", label: "Sillas" },
-    { value: "mant4", label: "Paños" },
-    { value: "mant5", label: "Mesa para proyector" },
-  ];
-
   const opcEquipos = [
-    { value: "equ1", label: "sonido" },
-    { value: "equ2", label: "audio para presentación" },
-    { value: "equ3", label: "micrófono" },
+    { value: "equ1", label: "Sonido" },
+    { value: "equ2", label: "Audio para presentación" },
+    { value: "equ3", label: "Micrófono" },
     { value: "equ4", label: "Pantalla" },
   ];
 
@@ -126,14 +164,10 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
     <div className="formulario-eventos-wrapper">
       <div className="formulario-header">
         <h2>{eventoEditando ? "Editar Evento" : "Crear Nuevo Evento"}</h2>
-        <p>
-          {eventoEditando
-            ? "Modifica los datos del evento."
-            : "Completa los datos para registrar un evento en el sistema."}
-        </p>
+        <p>Completa los datos para registrar un evento en el sistema.</p>
       </div>
 
-      <Form onSubmit={handleSubmit(handleFormSubmit)}>
+      <Form onSubmit={handleSubmit(handleFormSubmit, onFormError)}>
         <div className="form-sections-grid">
           <section className="form-section">
             <div className="section-title-wrap">
@@ -142,12 +176,10 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
 
             <Input
               label="Área/Departamento solicitante"
-              placeholder="Departamento que organizá el evento"
+              placeholder="Departamento que organiza el evento"
               required={true}
               error={errors.departamento?.message}
-              {...register("departamento", {
-                required: "El departamento es obligatorio",
-              })}
+              {...register("departamento", { required: "Obligatorio" })}
             />
 
             <Input
@@ -168,34 +200,18 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
           </section>
 
           <section className="form-section">
-            <h3>Datos de Invitados</h3>
-
+            <h3>Datos de Invitados (Google Calendar)</h3>
+            <p style={{fontSize: '0.85rem', marginBottom: '10px', color: '#666'}}>
+              A estas personas se les enviará una invitación por Google Calendar al correo ingresado.
+            </p>
             {fields.map((field, index) => (
               <div key={field.id} className="invitado-row">
-                <Input
-                  label="Nombre del Invitado"
-                  {...register(`invitados.${index}.nombre`)}
-                />
-                <Input
-                  label="Correo del Invitado"
-                  {...register(`invitados.${index}.correo`)}
-                />
-
-                {/* Botón para quitar un invitado si te equivocas */}
-                <Btn
-                  type="button"
-                  texto="Eliminar"
-                  onClick={() => remove(index)}
-                />
+                <Input label="Nombre del Invitado" {...register(`invitados.${index}.nombre`)} />
+                <Input label="Correo del Invitado" {...register(`invitados.${index}.correo`)} />
+                <Btn type="button" texto="Eliminar" onClick={() => remove(index)} />
               </div>
             ))}
-
-            {/* Botón para agregar nuevo */}
-            <Btn
-              type="button"
-              texto="+ Agregar un invitado"
-              onClick={() => append({ nombre: "", correo: "" })}
-            />
+            <Btn type="button" texto="+ Agregar un invitado" onClick={() => append({ nombre: "", correo: "" })} />
           </section>
 
           {/* SECCIÓN 1: Info Básica */}
@@ -204,161 +220,89 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
               <h3>Información del Evento</h3>
             </div>
 
-            <Input
-              label="Nombre del Evento"
-              placeholder="Ej.: Conferencia de Tecnología"
-              required={true}
-              error={errors.nombre?.message}
-              {...register("nombre", { required: "El nombre es obligatorio" })}
-            />
+            <Input label="Nombre del Evento" placeholder="Ej.: Conferencia de Tecnología" required={true}
+              error={errors.nombre?.message} {...register("nombre", { required: "Obligatorio" })} />
 
-            <Input
-              label="Publico Objetivo"
-              placeholder="Ej.: Fortalecer la experiencia académica de nuestros estudiantes a través de la vinculación con expertos en arquitectura y los proyectos prácticos que éstos solicitan."
-              required={true}
-              error={errors.publico?.message}
-              {...register("publico", {
-                required: "El público es obligatorio",
-              })}
-            />
+            <Input label="Público Objetivo" required={true}
+              error={errors.publico?.message} {...register("publico", { required: "Obligatorio" })} />
 
-            <Input
-              label="Autoridades Asistentes"
-              placeholder="Ej.: Coordinador de Carrera, Director de Plantel"
-              required={true}
-              error={errors.autoridades?.message}
-              {...register("autoridades", {
-                required: "Las autoridades son obligatorias",
-              })}
-            />
+            <Input label="Autoridades Asistentes" required={true}
+              error={errors.autoridades?.message} {...register("autoridades", { required: "Obligatorio" })} />
 
-            <Textarea
-              label="Descripción del Evento"
-              placeholder="Describe brevemente el evento"
-              required={true}
-              error={errors.comentarios?.message}
-              {...register("comentarios", {
-                required: "La descripción es obligatoria",
-              })}
-            />
+            <Textarea label="Descripción del Evento" required={true}
+              error={errors.comentarios?.message} {...register("comentarios", { required: "Obligatorio" })} />
           </section>
 
-          {/* SECCIÓN 2: Fecha y Lugar en Tarjetas Separadas */}
+          {/* SECCIÓN 2: Fecha y Lugar */}
           <div className="two-cards-grid">
-            {/* TARJETA IZQUIERDA: Calendario */}
             <section className="form-section">
-              <div className="section-title-wrap">
-                <h3>Fecha del Evento</h3>
-              </div>
+              <div className="section-title-wrap"><h3>Fecha del Evento</h3></div>
               <div className="calendario-wrapper">
-                <Controller
-                  control={control}
-                  name="fecha"
-                  rules={{ required: "La fecha es requerida" }}
+                <Controller control={control} name="fecha" rules={{ required: "Requerida" }}
                   render={({ field }) => (
-                    <DatePicker
-                      selected={field.value ? new Date(field.value) : null}
-                      onChange={(date) => field.onChange(date)}
-                      inline
-                    />
-                  )}
-                />
+                    <DatePicker selected={field.value ? new Date(field.value) : null} onChange={(date) => field.onChange(date)} inline />
+                  )} />
               </div>
-              {errors.fecha && (
-                <span className="input-error-text text-center">
-                  {errors.fecha.message}
-                </span>
-              )}
+              {errors.fecha && <span className="input-error-text text-center">{errors.fecha.message}</span>}
             </section>
 
-            {/* TARJETA DERECHA: Horarios y Lugar */}
             <section className="form-section">
-              <div className="section-title-wrap">
-                <h3>Lugar y Horarios</h3>
-              </div>
+              <div className="section-title-wrap"><h3>Lugar y Horarios</h3></div>
               <div className="FechaHoraInputs">
-                <Input
-                  label="Hora de Inicio"
-                  type="time"
-                  required={true}
-                  error={errors.hora?.message}
-                  {...register("hora", { required: "Requerida" })}
-                />
-                <Input
-                  label="Fin del Evento"
-                  type="time"
-                  required={true}
-                  error={errors.horaFin?.message}
-                  {...register("horaFin", { required: "Requerida" })}
-                />
-                <Input
-                  label="Plantel del Evento"
-                  placeholder="Ej.: Plantel Centro"
-                  required={true}
-                  error={errors.plantel?.message}
-                  {...register("plantel", {
-                    required: "El plantel es obligatorio",
-                  })}
-                />
-                <Input
-                  label="Área a utilizar"
-                  placeholder="Ej.: Auditorio Principal"
-                  required={true}
-                  error={errors.area?.message}
-                  {...register("area", {
-                    required: "El área es obligatoria",
-                  })}
-                />
+                <Input label="Hora de Apartado" type="time" required={true}
+                  error={errors.horaApartado?.message} {...register("horaApartado", { required: "Requerida" })} />
+                <Input label="Hora de Inicio" type="time" required={true}
+                  error={errors.hora?.message} {...register("hora", { required: "Requerida" })} />
+                <Input label="Fin del Evento" type="time" required={true}
+                  error={errors.horaFin?.message} {...register("horaFin", { required: "Requerida" })} />
+
+                <Input label="Plantel del Evento" placeholder="Escribe o selecciona de la lista..." required={true}
+                  list="planteles-list"
+                  error={errors.plantel?.message} {...register("plantel", { required: "Obligatorio" })} />
+                <datalist id="planteles-list">
+                  {opcPlanteles.map(p => <option key={p.value} value={p.value} />)}
+                </datalist>
+
+                <Input label="Área a utilizar" placeholder="Escribe o selecciona de la lista..." required={true}
+                  list="areas-list"
+                  error={errors.area?.message} {...register("area", { required: "Obligatorio" })} />
+                <datalist id="areas-list">
+                  {opcAreas.map(a => <option key={a.value} value={a.value} />)}
+                </datalist>
               </div>
             </section>
           </div>
 
-          {/* SECCIÓN 2: Configuración y Responsables */}
+          {/* SECCIÓN Cobertura (Dinámica por roles) */}
           <section className="form-section">
-            <div className="section-title-wrap">
-              <h3>Cobertura</h3>
-            </div>
+            <div className="section-title-wrap"><h3>Cobertura</h3></div>
 
-            <Input
-              label="Objetivo Académico"
-              placeholder="Ej.: Promover el conocimiento"
-              required={true}
-              error={errors.objetivo?.message}
-              {...register("objetivo", {
-                required: "El objetivo es obligatorio",
-              })}
-            />
-            <Select
-              label="Estatus"
-              options={opcEstatus}
-              required={true}
-              error={errors.estatus?.message}
-              {...register("estatus", { required: "Requerido" })}
-            />
+            <Input label="Objetivo Académico" required={true}
+              error={errors.objetivo?.message} {...register("objetivo", { required: "Obligatorio" })} />
+            
+            {isAdmin && (
+              <>
+                <Select label="Estatus" options={opcEstatus} required={true}
+                  error={errors.estatus?.message} {...register("estatus", { required: "Requerido" })} />
 
-            <Select
-              label="Selecciona un Proveedor"
-              options={opcProveedores}
-              {...register("proveedor")}
-            />
-
-            {/* Solo se muestra si hay un proveedor seleccionado */}
-            {proveedorSeleccionado && (
-              <div className="checkbox-group mt-3">
-                <h4>Materiales disponibles:</h4>
-                <div className="checkbox-grid">
-                  {materialesPorProveedor[proveedorSeleccionado]?.map(
-                    (material) => (
-                      <Input
-                        key={material}
-                        type="checkbox"
-                        label={material}
-                        {...register(`materiales.${material}`)}
-                      />
-                    ),
-                  )}
+                <div className="checkbox-group mt-3">
+                  <label>Asignar Proveedores (Opcional):</label>
+                  <div style={{display: 'flex', flexDirection: 'column', gap: '8px', margin: '10px 0'}}>
+                    {opcProveedores.map(p => (
+                      <label key={p.value} style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                        <input type="checkbox" value={p.value} {...register("proveedoresIds")} />
+                        <span>{p.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                  
+                  <div style={{marginTop: '15px', padding: '15px', border: '1px solid #ddd', borderRadius: '5px'}}>
+                    <p style={{marginBottom: '10px'}}><strong>¿Agregar otro proveedor?</strong></p>
+                    <Input label="Nombre del Nuevo Proveedor" {...register("nuevoProveedorNombre")} />
+                    <Input label="Correo del Nuevo Proveedor (Para notificación)" {...register("nuevoProveedorCorreo")} />
+                  </div>
                 </div>
-              </div>
+              </>
             )}
           </section>
 
@@ -366,176 +310,54 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
             <section className="form-section">
               <div className="section-title-wrap">
                 <h3>Fotografía y Reseña</h3>
-
                 <div className="radio-group">
-                  <label className="radio-label">
-                    ¿Requiere servicio de cobertura fotográfica y elaboración de
-                    reseña? *
-                  </label>
+                  <label className="radio-label">¿Requiere servicio de cobertura fotográfica y elaboración de reseña? *</label>
                   <div className="radio-options">
-                    <label className="radio-option">
-                      <Input
-                        type="radio"
-                        value="si"
-                        {...register("fotografiaResena", {
-                          required: "Selecciona una opción",
-                        })}
-                      />
-                      <span>Sí</span>
-                    </label>
-                    <label className="radio-option">
-                      <Input
-                        type="radio"
-                        value="no"
-                        {...register("fotografiaResena", {
-                          required: "Selecciona una opción",
-                        })}
-                      />
-                      <span>No</span>
-                    </label>
+                    <label className="radio-option"><Input type="radio" value="si" {...register("fotografiaResena")} /><span>Sí</span></label>
+                    <label className="radio-option"><Input type="radio" value="no" {...register("fotografiaResena")} /><span>No</span></label>
                   </div>
-                  {errors.fotografiaResena && (
-                    <span className="input-error-text">
-                      {errors.fotografiaResena.message}
-                    </span>
-                  )}
                 </div>
               </div>
             </section>
 
             <section className="form-section">
-              <div className="section-title-wrap">
-                <h3>Apoyo a acceso</h3>
-              </div>
+              <div className="section-title-wrap"><h3>Apoyo a acceso</h3></div>
               <div className="radio-group">
-                <label className="radio-label">
-                  ¿Requiere apoyo para lugares de estacionamiento para el
-                  evento? *
-                </label>
+                <label className="radio-label">¿Requiere apoyo para lugares de estacionamiento para el evento? *</label>
                 <div className="radio-options">
-                  <label className="radio-option">
-                    <Input
-                      type="radio"
-                      value="si"
-                      {...register("apoyoAcceso", {
-                        required: "Selecciona una opción",
-                      })}
-                    />
-                    <span>Sí</span>
-                  </label>
-                  <label className="radio-option">
-                    <Input
-                      type="radio"
-                      value="no"
-                      {...register("apoyoAcceso", {
-                        required: "Selecciona una opción",
-                      })}
-                    />
-                    <span>No</span>
-                  </label>
+                  <label className="radio-option"><Input type="radio" value="si" {...register("apoyoAcceso")} /><span>Sí</span></label>
+                  <label className="radio-option"><Input type="radio" value="no" {...register("apoyoAcceso")} /><span>No</span></label>
                 </div>
-                {errors.apoyoAcceso && (
-                  <span className="input-error-text">
-                    {errors.apoyoAcceso.message}
-                  </span>
-                )}
               </div>
             </section>
           </div>
 
           <section className="form-section">
-            <div className="section-title-wrap">
-              <h3>Apoyo de mantenimiento</h3>
-            </div>
-
+            <div className="section-title-wrap"><h3>Apoyo de mantenimiento</h3></div>
             <div className="radio-group">
-              <label className="radio-label">
-                ¿Requiere apoyo de mantenimiento para el evento? *
-              </label>
+              <label className="radio-label">¿Requiere apoyo de mantenimiento para el evento? *</label>
               <div className="radio-options">
-                <label className="radio-option">
-                  <Input
-                    type="radio"
-                    value="si"
-                    {...register("apoyoMantenimiento", {
-                      required: "Selecciona una opción",
-                    })}
-                  />
-                  <span>Sí</span>
-                </label>
-                <label className="radio-option">
-                  <Input
-                    type="radio"
-                    value="no"
-                    {...register("apoyoMantenimiento", {
-                      required: "Selecciona una opción",
-                    })}
-                  />
-                  <span>No</span>
-                </label>
+                <label className="radio-option"><Input type="radio" value="si" {...register("apoyoMantenimiento")} /><span>Sí</span></label>
+                <label className="radio-option"><Input type="radio" value="no" {...register("apoyoMantenimiento")} /><span>No</span></label>
               </div>
-              {errors.apoyoMantenimiento && (
-                <span className="input-error-text">
-                  {errors.apoyoMantenimiento.message}
-                </span>
-              )}
-
-              <Input
-                placeholder="Ej.: Pódium(Núm.), Mesas(Núm.), Sillas(Núm.), Paños(Núm.), Mesa para proyector(Núm.), Otro"
-                label="Especifica lo que necesitas del área de mantenimiento"
-                {...register("Mantenimiento")}
-              />
+              <Input placeholder="Ej.: Mesas(Núm.), Sillas(Núm.)..." label="Especifica lo que necesitas" {...register("Mantenimiento")} />
             </div>
           </section>
 
           <section className="form-section">
-            <div className="section-title-wrap">
-              <h3>Medios audiovisuales</h3>
-            </div>
-
+            <div className="section-title-wrap"><h3>Medios audiovisuales</h3></div>
             <div className="radio-group">
-              <label className="radio-label">
-                ¿Requiere apoyo de medios audiovisuales para el evento? *
-              </label>
+              <label className="radio-label">¿Requiere apoyo de medios audiovisuales? *</label>
               <div className="radio-options">
-                <label className="radio-option">
-                  <Input
-                    type="radio"
-                    value="si"
-                    {...register("apoyoAudiovisual", {
-                      required: "Selecciona una opción",
-                    })}
-                  />
-                  <span>Sí</span>
-                </label>
-                <label className="radio-option">
-                  <Input
-                    type="radio"
-                    value="no"
-                    {...register("apoyoAudiovisual", {
-                      required: "Selecciona una opción",
-                    })}
-                  />
-                  <span>No</span>
-                </label>
+                <label className="radio-option"><Input type="radio" value="si" {...register("apoyoAudiovisual")} /><span>Sí</span></label>
+                <label className="radio-option"><Input type="radio" value="no" {...register("apoyoAudiovisual")} /><span>No</span></label>
               </div>
-              {errors.apoyoAudiovisual && (
-                <span className="input-error-text">
-                  {errors.apoyoAudiovisual.message}
-                </span>
-              )}
             </div>
-
             <div className="checkbox-group">
-              <h4>Selecciona los equipos audiovisuales que requieres:</h4>
+              <h4>Equipos audiovisuales que requieres:</h4>
               <div className="checkbox-grid">
                 {opcEquipos.map((equipo) => (
-                  <Input
-                    key={equipo.value}
-                    type="checkbox"
-                    label={equipo.label}
-                    {...register(`equiposAudiovisuales.${equipo.value}`)}
-                  />
+                  <Input key={equipo.value} type="checkbox" label={equipo.label} {...register(`equiposAudiovisuales.${equipo.value}`)} />
                 ))}
               </div>
             </div>
@@ -543,10 +365,7 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
         </div>
 
         <div className="form-actions">
-          <Btn
-            type="submit"
-            texto={eventoEditando ? "Guardar Cambios" : "Guardar Evento"}
-          />
+          <Btn type="submit" texto={eventoEditando ? "Guardar Cambios" : "Guardar Evento"} />
         </div>
       </Form>
     </div>
