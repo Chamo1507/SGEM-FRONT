@@ -1,8 +1,8 @@
 import "./btn.css";
 
-const Btn = ({ texto }) => {
+const Btn = ({ texto, onClick, type = "button" }) => {
   return (
-    <button type="button" className="btn-formulario">
+    <button type={type} className="btn-formulario" onClick={onClick}>
       {texto}
     </button>
   );

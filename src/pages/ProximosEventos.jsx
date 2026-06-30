@@ -1,57 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import FormularioEventos from '../components/FormularioEventos';
+import axios from 'axios';
 import './ProximosEventos.css';
 
 const ProximosEventos = () => {
   const [viewMode, setViewMode] = useState('list'); // 'list', 'form', 'details'
   const [selectedEvento, setSelectedEvento] = useState(null);
-  const [eventos, setEventos] = useState([
-    {
-      id: 1,
-      nombre: 'Conferencia Anual de Tecnología',
-      estatus: 'confirmado',
-      fecha: '2026-07-15',
-      hora: '10:00',
-      organizador: 'org1',
-      comentarios: 'Evento principal sobre inteligencia artificial en el auditorio principal.',
-      objetivo: 'Fomentar la innovación tecnológica.',
-      prioridad: 'alta',
-      proveedor: 'prov1'
-    },
-    {
-      id: 2,
-      nombre: 'Taller de Liderazgo Estudiantil',
-      estatus: 'pendiente',
-      fecha: '2026-07-20',
-      hora: '14:30',
-      organizador: 'org2',
-      comentarios: 'Taller para representantes de carrera. Faltan confirmar proveedores.',
-      objetivo: 'Mejorar las habilidades de liderazgo.',
-      prioridad: 'media',
-      proveedor: 'prov2'
-    },
-    {
-      id: 3,
-      nombre: 'Simposio de Salud Mental',
-      estatus: 'en preparación',
-      fecha: '2026-08-05',
-      hora: '09:00',
-      organizador: 'org3',
-      comentarios: 'Charlas de psicólogos invitados y dinámicas grupales en la explanada.',
-      objetivo: 'Concientizar sobre la salud mental.',
-      prioridad: 'baja',
-      proveedor: 'prov3'
-    }
-  ]);
+  const [eventos, setEventos] = useState([]);
+  const [filterMode, setFilterMode] = useState('all'); // 'all', 'coverage'
+  const [isAdmin, setIsAdmin] = useState(false);
 
-  const handleSaveEvento = (datosEvento) => {
-    if (selectedEvento) {
-      // Modo Edición
-      setEventos(eventos.map(ev => ev.id === datosEvento.id ? datosEvento : ev));
-    } else {
-      // Modo Creación
-      setEventos([...eventos, datosEvento]);
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    if (user.id_rol === 1) setIsAdmin(true);
+    fetchEventos();
+  }, []);
+
+  const fetchEventos = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/eventos`);
+      
+      const fetchedEventos = response.data.map(ev => ({
+        id: ev.id_evento,
+        nombre: ev.nombre_evento,
+        estatus: ev.estatus_evento || 'Pendiente',
+        fecha: new Date(ev.fecha_evento).toISOString().split('T')[0],
+        hora: ev.horainicio_evento ? new Date(ev.horainicio_evento).toISOString().split('T')[1].substring(0, 5) : '',
+        horaFin: ev.horafin_evento ? new Date(ev.horafin_evento).toISOString().split('T')[1].substring(0, 5) : '',
+        organizador: ev.responsable_evento || 'No asignado',
+        comentarios: ev.descripcion_evento,
+        objetivo: ev.objetivo_evento,
+        prioridad: ev.prioridad_evento,
+        requiereCobertura: ev.requiere_cobertura,
+        plantel: ev.planteles?.nombre_plantel || 'N/A',
+        espacio: ev.espacios?.nombre_espacio || 'N/A',
+        proveedores: ev.proveedor_evento?.map(pe => pe.proveedores?.nombre_proveedor).join(', ') || 'Ninguno'
+      }));
+      setEventos(fetchedEventos);
+    } catch (error) {
+      console.error("Error fetching eventos:", error);
     }
+  };
+
+  const handleSaveEvento = () => {
+    fetchEventos();
     setViewMode('list');
     setSelectedEvento(null);
   };
@@ -67,8 +59,34 @@ const ProximosEventos = () => {
   };
 
   const handleEdit = () => {
+    // Para el admin, al darle editar en uno de cobertura, le permite asignar proveedor
     setViewMode('form');
   };
+
+  const handleEliminar = async (evento) => {
+    if (window.confirm('¿Estás seguro de que deseas eliminar este evento? También se cancelará en Google Calendar.')) {
+      try {
+        const user = JSON.parse(localStorage.getItem('user'));
+        const calendarId = user?.google_calendar_id || user?.correo_usuario;
+        await axios.delete(`${import.meta.env.VITE_API_URL}/eventos/${evento.id}`, {
+          data: { calendarId } // Mandamos el calendarId para eliminar de Google Calendar
+        });
+        alert('Evento eliminado exitosamente');
+        fetchEventos();
+        if (selectedEvento?.id === evento.id) {
+          setViewMode('list');
+          setSelectedEvento(null);
+        }
+      } catch (error) {
+        console.error('Error al eliminar:', error);
+        alert('Ocurrió un error al intentar eliminar el evento');
+      }
+    }
+  };
+
+  const displayedEventos = filterMode === 'coverage' 
+    ? eventos.filter(e => e.requiereCobertura && e.estatus === 'pendiente') 
+    : eventos;
 
   return (
     <div className="proximos-container">
@@ -93,6 +111,25 @@ const ProximosEventos = () => {
       </div>
 
       <div className="proximos-content">
+        {viewMode === 'list' && isAdmin && (
+          <div className="admin-filters" style={{marginBottom: '20px', display: 'flex', gap: '10px'}}>
+            <button 
+              className={`btn-filter ${filterMode === 'all' ? 'active-filter' : ''}`}
+              onClick={() => setFilterMode('all')}
+              style={{padding: '8px 16px', borderRadius: '20px', border: '1px solid #ccc', cursor: 'pointer', background: filterMode === 'all' ? '#007bff' : '#fff', color: filterMode === 'all' ? '#fff' : '#333'}}
+            >
+              Todos los Eventos
+            </button>
+            <button 
+              className={`btn-filter ${filterMode === 'coverage' ? 'active-filter' : ''}`}
+              onClick={() => setFilterMode('coverage')}
+              style={{padding: '8px 16px', borderRadius: '20px', border: '1px solid #ccc', cursor: 'pointer', background: filterMode === 'coverage' ? '#ff9800' : '#fff', color: filterMode === 'coverage' ? '#fff' : '#333'}}
+            >
+              Pendientes de Cobertura 🚨
+            </button>
+          </div>
+        )}
+
         {viewMode === 'form' ? (
           <div className="animation-fade-in">
             <FormularioEventos onSaveEvento={handleSaveEvento} eventoEditando={selectedEvento} />
@@ -109,8 +146,9 @@ const ProximosEventos = () => {
                 </div>
                 <div className="details-meta">
                   <span>📅 {selectedEvento.fecha}</span>
-                  <span>🕒 {selectedEvento.hora}</span>
-                  <span>👤 Organizador: {selectedEvento.organizador === 'org1' ? 'Organizador 1' : selectedEvento.organizador === 'org2' ? 'Organizador 2' : selectedEvento.organizador}</span>
+                  <span>🕒 {selectedEvento.hora} - {selectedEvento.horaFin}</span>
+                  <span>📍 {selectedEvento.plantel} - {selectedEvento.espacio}</span>
+                  <span>👤 Responsable: {selectedEvento.organizador}</span>
                 </div>
               </div>
               <div className="details-body">
@@ -120,17 +158,28 @@ const ProximosEventos = () => {
                 <h3>Descripción / Comentarios</h3>
                 <p>{selectedEvento.comentarios}</p>
 
+                {isAdmin && (
+                  <>
+                    <h3>Cobertura Asignada</h3>
+                    <p><strong>Proveedores:</strong> {selectedEvento.proveedores}</p>
+                    <p><strong>Requiere Fotografía/Reseña:</strong> {selectedEvento.requiereCobertura ? 'Sí' : 'No'}</p>
+                  </>
+                )}
+
                 <div className="details-actions">
                   <button className="btn-edit" onClick={handleEdit}>
-                    ✏️ Editar Evento
+                    {isAdmin && selectedEvento.requiereCobertura ? '✏️ Asignar Cobertura / Editar' : '✏️ Editar Evento'}
+                  </button>
+                  <button className="btn-edit" style={{backgroundColor: '#dc3545', marginLeft: '10px'}} onClick={() => handleEliminar(selectedEvento)}>
+                    🗑️ Eliminar Evento
                   </button>
                 </div>
               </div>
             </div>
           </div>
-        ) : eventos.length > 0 ? (
+        ) : displayedEventos.length > 0 ? (
           <div className="eventos-list animation-fade-in">
-            {eventos.map((evento) => (
+            {displayedEventos.map((evento) => (
               <div key={evento.id} className="evento-card">
                 <div className="evento-card-header">
                   <h3>{evento.nombre}</h3>
@@ -140,12 +189,18 @@ const ProximosEventos = () => {
                 </div>
                 <div className="evento-card-body">
                   <p><strong>Fecha:</strong> {evento.fecha} - {evento.hora}</p>
-                  <p><strong>Organizador:</strong> {evento.organizador === 'org1' ? 'Organizador 1' : evento.organizador === 'org2' ? 'Organizador 2' : evento.organizador}</p>
+                  <p><strong>Responsable:</strong> {evento.organizador}</p>
+                  {isAdmin && evento.requiereCobertura && (
+                     <p style={{color: '#ff9800', fontWeight: 'bold'}}>📸 Requiere Cobertura</p>
+                  )}
                   <p className="evento-desc">{evento.comentarios}</p>
                 </div>
-                <div className="evento-card-footer">
-                  <button className="btn-acerca" onClick={() => handleViewDetails(evento)}>
-                    Ver acerca de
+                <div className="evento-card-footer" style={{display: 'flex', justifyContent: 'space-between', gap: '10px'}}>
+                  <button className="btn-acerca" style={{flex: 1}} onClick={() => handleViewDetails(evento)}>
+                    Ver detalles
+                  </button>
+                  <button className="btn-acerca" style={{flex: 1, backgroundColor: '#dc3545', color: 'white'}} onClick={() => handleEliminar(evento)}>
+                    Eliminar
                   </button>
                 </div>
               </div>
@@ -154,11 +209,13 @@ const ProximosEventos = () => {
         ) : (
           <div className="empty-events-state animation-fade-in">
             <div className="empty-icon">📅</div>
-            <h3>No hay eventos programados en esta sección</h3>
-            <p>Aún no has registrado ningún evento para visualizarlo aquí.</p>
-            <button className="btn-primary" onClick={handleCreateNew}>
-              Crear tu primer evento
-            </button>
+            <h3>No hay eventos en esta vista</h3>
+            <p>No se encontraron eventos con los filtros actuales.</p>
+            {filterMode !== 'coverage' && (
+              <button className="btn-primary" onClick={handleCreateNew}>
+                Crear tu primer evento
+              </button>
+            )}
           </div>
         )}
       </div>

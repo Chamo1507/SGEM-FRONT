@@ -12,6 +12,8 @@
 }
 
 .input-field {
+  width: 100%;
+  box-sizing: border-box;
   padding: 8px 12px;
   background-color: #ffffff;
   border: 1px solid #d1d5db;
@@ -23,6 +25,12 @@
     border-color 0.2s ease-in-out,
     box-shadow 0.2s ease-in-out;
   outline: none;
+}
+
+/* Evitamos que los checkboxes o radios se estiren al 100% de ancho */
+.input-field[type="checkbox"],
+.input-field[type="radio"] {
+  width: auto;
 }
 
 .input-field:focus {
@@ -60,4 +68,32 @@
   background-size: 12px auto;
   padding-right: 32px;
   cursor: pointer;
+}
+
+/* Estilos específicos para Checkboxes y Radios alineados horizontalmente */
+.input-container.input-checkbox-container {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.input-checkbox-container .input-label {
+  cursor: pointer;
+  user-select: none;
+  font-size: 15px;
+  color: #475569;
+}
+
+.input-checkbox-container .input-field {
+  cursor: pointer;
+  margin: 0;
+  width: 18px;
+  height: 18px;
+  padding: 0; /* Quitamos el padding grande de input de texto */
+}
+
+.input-checkbox-container .input-error-text {
+  width: 100%;
 }
