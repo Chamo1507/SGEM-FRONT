@@ -47,7 +47,7 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
-    if (user.id_rol === 1) setIsAdmin(true);
+    if (user.id_rol === 1 || user.id_rol === 2) setIsAdmin(true);
 
     const fetchData = async () => {
       try {
@@ -250,11 +250,17 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
               <div className="section-title-wrap"><h3>Lugar y Horarios</h3></div>
               <div className="FechaHoraInputs">
                 <Input label="Hora de Apartado" type="time" required={true}
-                  error={errors.horaApartado?.message} {...register("horaApartado", { required: "Requerida" })} />
+                  error={errors.horaApartado?.message} {...register("horaApartado", { 
+                    required: "Requerida",
+                    validate: (value, formValues) => !formValues.hora || value <= formValues.hora || "No puede ser posterior al inicio"
+                  })} />
                 <Input label="Hora de Inicio" type="time" required={true}
                   error={errors.hora?.message} {...register("hora", { required: "Requerida" })} />
                 <Input label="Fin del Evento" type="time" required={true}
-                  error={errors.horaFin?.message} {...register("horaFin", { required: "Requerida" })} />
+                  error={errors.horaFin?.message} {...register("horaFin", { 
+                    required: "Requerida",
+                    validate: (value, formValues) => !formValues.hora || value > formValues.hora || "Debe ser posterior a la de inicio"
+                  })} />
 
                 <Input label="Plantel del Evento" placeholder="Escribe o selecciona de la lista..." required={true}
                   list="planteles-list"
