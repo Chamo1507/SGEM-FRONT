@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./login.css";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 import maxSgmLogo from "../assets/brand/MAX-SGM.png";
 
@@ -21,17 +22,26 @@ const Login = () => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     
-    if (!form.email.trim().toLowerCase().endsWith("@umad.edu.mx")) {
-      setError("Por favor, utiliza tu correo institucional (@umad.edu.mx)");
-      return;
-    }
-    
     setError("");
-    console.log("Intento de login:", form, { remember });
-    navigate("/");
+    try {
+      // Usamos axios para llamar al backend real
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, {
+        correo_usuario: form.email,
+        contrasena_usuario: form.password
+      });
+
+      console.log("Login exitoso:", response.data);
+      // Aquí puedes guardar el token o usuario en localStorage si implementas JWT
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+
+      navigate("/home");
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || "Credenciales inválidas o error de servidor");
+    }
   };
 
   return (
@@ -96,6 +106,9 @@ const Login = () => {
             <button className="login-button" type="submit">
               Iniciar Sesión
             </button>
+            <div style={{ marginTop: "1rem", textAlign: "center" }}>
+              ¿No tienes cuenta? <a href="/register" onClick={(e) => { e.preventDefault(); navigate('/register'); }}>Crear cuenta</a>
+            </div>
           </form>
         </div>
       </div>

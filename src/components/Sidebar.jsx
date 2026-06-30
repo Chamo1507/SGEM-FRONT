@@ -38,7 +38,7 @@ const Sidebar = () => {
         <ul>
           <li>
             <NavLink
-              to="/"
+              to="/home"
               className={({ isActive }) =>
                 isActive ? "nav-item active" : "nav-item"
               }
@@ -152,7 +152,7 @@ const Sidebar = () => {
             <span className="nav-text user-name">Admin SGEM</span>
           </div>
         </div>
-        <button className="logout-btn" onClick={() => navigate("/login")}>
+        <button className="logout-btn" onClick={() => navigate("/")}>
           <LogOut className="icon" size={24} />
           <span className="nav-text">Cerrar Sesión</span>
         </button>
