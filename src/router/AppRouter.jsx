@@ -1,5 +1,6 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "../pages/login";
+import Register from "../pages/Register";
 import Home from "../pages/Home";
 import FormularioEventos from "../components/FormularioEventos";
 import Configuracion from "../pages/Configuracion";
@@ -15,9 +16,11 @@ const AppRouter = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Navigate to="/" replace />} />
+        <Route path="/register" element={<Register />} />
         <Route element={<MainLayout />}>
-          <Route path="/" element={<Home />} />
+          <Route path="/home" element={<Home />} />
           <Route path="/configuracion" element={<Configuracion />} />
           <Route path="/eventos/proximos" element={<ProximosEventos />} />
           <Route path="/eventos/dashboard" element={<Dashboard />} />
