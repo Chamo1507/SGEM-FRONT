@@ -166,6 +166,9 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
         plantel: data.plantel,
         area: data.area,
         ids_areas_apoyo: finalProveedoresIds,
+        proveedoresIds: finalProveedoresIds,
+        id_usuario: user?.id_usuario || null,
+        google_calendar_id,
       };
 
       if (eventoEditando) {
