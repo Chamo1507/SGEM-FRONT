@@ -19,6 +19,7 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
     reset,
     control,
     watch,
+    setValue,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -29,14 +30,13 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
       estatus: "pendiente",
       responsable: "",
       proveedoresIds: [],
+      nuevosProveedores: [],
       fecha: "",
       hora: "",
       horaApartado: "",
       horaFin: "",
       plantel: "",
       area: "",
-      nuevoProveedorNombre: "",
-      nuevoProveedorCorreo: "",
     },
   });
 
@@ -73,6 +73,7 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
           provsRes.data.map((p) => ({
             value: p.id_proveedor,
             label: p.nombre_proveedor,
+            correo: p.correo_proveedor || "",
           })),
         );
       } catch (error) {
@@ -92,14 +93,13 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
         estatus: "pendiente",
         responsable: "",
         proveedoresIds: [],
+        nuevosProveedores: [],
         fecha: "",
         hora: "",
         horaApartado: "",
         horaFin: "",
         plantel: "",
         area: "",
-        nuevoProveedorNombre: "",
-        nuevoProveedorCorreo: "",
       });
     }
   }, [eventoEditando, reset]);
@@ -111,17 +111,32 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
 
       // Check if admin is adding new providers
       let finalProveedoresIds = [...(data.proveedoresIds || [])];
-      if (isAdmin && data.proveedores && data.proveedores.length > 0) {
-        for (const prov of data.proveedores) {
+
+      // Save newly created providers
+      if (
+        isAdmin &&
+        data.nuevosProveedores &&
+        data.nuevosProveedores.length > 0
+      ) {
+        for (const prov of data.nuevosProveedores) {
           if (prov.nombre) {
             const provRes = await axios.post(
               `${import.meta.env.VITE_API_URL}/proveedores`,
               {
                 nombre_proveedor: prov.nombre,
                 correo_proveedor: prov.correo || "",
-              }
+              },
             );
             finalProveedoresIds.push(provRes.data.id_proveedor);
+          }
+        }
+      }
+
+      // Collect explicitly selected existing providers
+      if (isAdmin && data.proveedores && data.proveedores.length > 0) {
+        for (const prov of data.proveedores) {
+          if (prov.id) {
+            finalProveedoresIds.push(Number(prov.id));
           }
         }
       }
@@ -163,12 +178,29 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
     }
   };
 
-  const { fields: invitadosFields, append: appendInvitado, remove: removeInvitado } = useFieldArray({
+  const {
+    fields: invitadosFields,
+    append: appendInvitado,
+    remove: removeInvitado,
+  } = useFieldArray({
     control,
     name: "invitados",
   });
 
-  const { fields: proveedoresFields, append: appendProveedor, remove: removeProveedor } = useFieldArray({
+  const {
+    fields: nuevosProveedoresFields,
+    append: appendNuevoProveedor,
+    remove: removeNuevoProveedor,
+  } = useFieldArray({
+    control,
+    name: "nuevosProveedores",
+  });
+
+  const {
+    fields: proveedoresFields,
+    append: appendProveedor,
+    remove: removeProveedor,
+  } = useFieldArray({
     control,
     name: "proveedores",
   });
@@ -185,6 +217,11 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
     { value: "equ2", label: "Audio para presentación" },
     { value: "equ3", label: "Micrófono" },
     { value: "equ4", label: "Pantalla" },
+  ];
+
+  const opcTiposAutoridad = [
+    { value: "interno", label: "Interno" },
+    { value: "externo", label: "Externo" },
   ];
 
   return (
@@ -249,13 +286,35 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
               {invitadosFields.map((field, index) => (
                 <div key={field.id} className="invitado-row">
                   <Input
-                    label="Autoridades Asistentes"
+                    label="Autoridad Asistente"
                     required={true}
-                    {...register(`invitados.${index}.nombre`, { required: "Obligatorio" })}
+                    {...register(`invitados.${index}.nombre`, {
+                      required: "Obligatorio",
+                    })}
+                  />
+                  <Input
+                    label="Apellido Paterno"
+                    {...register(`invitados.${index}.apellidoPaterno`)}
+                  />
+                  <Input
+                    label="Apellido Materno"
+                    {...register(`invitados.${index}.apellidoMaterno`)}
                   />
                   <Input
                     label="Correo del Invitado"
                     {...register(`invitados.${index}.correo`)}
+                  />
+                  <Input
+                    label="Teléfono del Invitado"
+                    {...register(`invitados.${index}.telefono`)}
+                  />
+                  <Input
+                    label="Institución del Invitado"
+                    {...register(`invitados.${index}.institucion`)}
+                  />
+                  <Select
+                    label="Tipo de Autoridad"
+                    {...register(`invitados.${index}.nivelAutoridad`)}
                   />
                   <Btn
                     className="delete-btn-small"
@@ -388,60 +447,109 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
             {isAdmin && (
               <>
                 <div className="checkbox-group mt-3">
-                  <label>Asignar Proveedores (Opcional):</label>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "8px",
-                      margin: "10px 0",
-                    }}
-                  >
-                    {opcProveedores.map((p) => (
-                      <label
-                        key={p.value}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "8px",
-                        }}
-                      >
-                        <input
-                          type="checkbox"
-                          value={p.value}
-                          {...register("proveedoresIds")}
-                        />
-                        <span>{p.label}</span>
-                      </label>
-                    ))}
-                  </div>
-
                   <div className="proveedor-extra-section">
-                    <div className="section-header-inline">
+                    <div
+                      className="section-header-inline"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        marginBottom: "16px",
+                      }}
+                    >
                       <p style={{ margin: 0 }}>
-                        <strong>¿Agregar otro proveedor?</strong>
+                        <strong>¿Crear nuevo proveedor?</strong>
                       </p>
                       <Btn
                         className="add-btn-small"
                         type="button"
                         texto="+ Añadir"
-                        onClick={() => appendProveedor({ nombre: "", correo: "" })}
+                        onClick={() =>
+                          appendNuevoProveedor({ nombre: "", correo: "" })
+                        }
                       />
                     </div>
-                    {proveedoresFields.map((field, index) => (
+                    {nuevosProveedoresFields.map((field, index) => (
                       <div key={field.id} className="invitado-row">
                         <Input
                           label="Nombre del Proveedor"
                           required={true}
-                          {...register(`proveedores.${index}.nombre`, {
+                          {...register(`nuevosProveedores.${index}.nombre`, {
                             required: "Obligatorio",
                           })}
                         />
                         <Input
                           label="Correo del Proveedor"
-                          {...register(`proveedores.${index}.correo`, {
+                          {...register(`nuevosProveedores.${index}.correo`)}
+                        />
+                        <Input
+                          label="Teléfono del Proveedor"
+                          {...register(`nuevosProveedores.${index}.telefono`)}
+                        />
+                        <Input
+                          label="Servicio del Proveedor"
+                          {...register(`nuevosProveedores.${index}.servicio`)}
+                        />
+                        <Btn
+                          className="delete-btn-small"
+                          type="button"
+                          texto="Eliminar"
+                          onClick={() => removeNuevoProveedor(index)}
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  <div
+                    className="proveedor-extra-section"
+                    style={{ marginTop: "20px" }}
+                  >
+                    <div
+                      className="section-header-inline"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        marginBottom: "16px",
+                      }}
+                    >
+                      <p style={{ margin: 0 }}>
+                        <strong>¿Agregar proveedor existente?</strong>
+                      </p>
+                      <Btn
+                        className="add-btn-small"
+                        type="button"
+                        texto="+ Añadir"
+                        onClick={() => appendProveedor({ id: "", correo: "" })}
+                      />
+                    </div>
+                    {proveedoresFields.map((field, index) => (
+                      <div key={field.id} className="invitado-row">
+                        <Select
+                          label="Proveedor"
+                          options={opcProveedores}
+                          required={true}
+                          {...register(`proveedores.${index}.id`, {
                             required: "Obligatorio",
+                            onChange: (e) => {
+                              const selectedId = e.target.value;
+                              const prov = opcProveedores.find(
+                                (p) => p.value == selectedId,
+                              );
+                              if (prov) {
+                                setValue(
+                                  `proveedores.${index}.correo`,
+                                  prov.correo,
+                                );
+                              }
+                            },
                           })}
+                        />
+                        <Input
+                          label="Correo del Proveedor"
+                          readOnly
+                          style={{ backgroundColor: "#f1f5f9" }}
+                          {...register(`proveedores.${index}.correo`)}
                         />
                         <Btn
                           className="delete-btn-small"
