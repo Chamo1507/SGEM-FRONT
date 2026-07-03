@@ -2,9 +2,9 @@
   width: 40%;
   box-sizing: border-box;
   padding: 10px;
-  background-color: #943636;
+  background-color: var(--umad-red);
   color: #fff;
-  border: 2px solid #943636;
+  border: 2px solid var(--umad-red);
   border-radius: 10px;
   font-size: 16px;
   font-family: "Balthazar", serif;

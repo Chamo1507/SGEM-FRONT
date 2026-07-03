@@ -9,10 +9,12 @@ const ProximosEventos = () => {
   const [eventos, setEventos] = useState([]);
   const [filterMode, setFilterMode] = useState('all'); // 'all', 'coverage'
   const [isAdmin, setIsAdmin] = useState(false);
+  const [canCreate, setCanCreate] = useState(false);
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
     if (user.id_rol === 1) setIsAdmin(true);
+    if (user.id_rol === 1 || user.id_rol === 3) setCanCreate(true);
     fetchEventos();
   }, []);
 
@@ -95,19 +97,21 @@ const ProximosEventos = () => {
           <h1>Gestión de Eventos</h1>
           <p>Administra la lista de eventos o registra uno nuevo.</p>
         </div>
-        <button 
-          className={viewMode !== 'list' ? "btn-toggle-form active" : "btn-toggle-form"}
-          onClick={() => {
-            if (viewMode === 'list') {
-              handleCreateNew();
-            } else {
-              setViewMode('list');
-              setSelectedEvento(null);
-            }
-          }}
-        >
-          {viewMode !== 'list' ? '← Volver a la Lista' : '+ Registrar Nuevo Evento'}
-        </button>
+        {canCreate && (
+          <button 
+            className={viewMode !== 'list' ? "btn-toggle-form active" : "btn-toggle-form"}
+            onClick={() => {
+              if (viewMode === 'list') {
+                handleCreateNew();
+              } else {
+                setViewMode('list');
+                setSelectedEvento(null);
+              }
+            }}
+          >
+            {viewMode !== 'list' ? '← Volver a la Lista' : '+ Registrar Nuevo Evento'}
+          </button>
+        )}
       </div>
 
       <div className="proximos-content">

@@ -11,6 +11,7 @@ import ProximosEventos from "../pages/ProximosEventos";
 import ConfirmarAsistencia from "../pages/ConfirmarAsistencia";
 import EncuestaInvitado from "../pages/EncuestaInvitado";
 import EncuestaOrganizador from "../pages/EncuestaOrganizador";
+import Inventario from "../components/Inventario";
 
 const AppRouter = () => {
   return (
@@ -26,8 +27,15 @@ const AppRouter = () => {
           <Route path="/eventos/dashboard" element={<Dashboard />} />
           <Route path="/eventos/reporte/:id" element={<ReporteEvento />} />
           <Route path="/eventos/confirmar" element={<ConfirmarAsistencia />} />
-          <Route path="/eventos/encuesta-invitado" element={<EncuestaInvitado />} />
-          <Route path="/eventos/encuesta-organizador" element={<EncuestaOrganizador />} />
+          <Route
+            path="/eventos/encuesta-invitado"
+            element={<EncuestaInvitado />}
+          />
+          <Route
+            path="/eventos/encuesta-organizador"
+            element={<EncuestaOrganizador />}
+          />
+          <Route path="/eventos/inventario" element={<Inventario />} />
         </Route>
       </Routes>
     </BrowserRouter>
