@@ -11,6 +11,7 @@ import {
   LogOutIcon as LogOut,
   ChevronDownIcon as ChevronDown,
   HomeIcon as Home,
+  PackageIcon as Package,
 } from "./Icons";
 
 const Sidebar = () => {
@@ -36,6 +37,8 @@ const Sidebar = () => {
   const canViewEncuestaInvitado = userRol === 1 || userRol === 4;
   const canViewEncuestaOrganizador = userRol === 1 || userRol === 3;
   const canViewConfiguracion = userRol === 1 || userRol === 2;
+  const canViewInventario =
+    userRol === 1 || userRol === 2 || userRol === 3 || userRol === 4;
 
   return (
     <aside className={`sidebar ${isCollapsed ? "collapsed" : ""}`}>
@@ -158,6 +161,22 @@ const Sidebar = () => {
             )}
           </li>
 
+          {canViewInventario && (
+            <li>
+              <NavLink
+                to="/eventos/inventario"
+                className={({ isActive }) =>
+                  isActive ? "nav-item active" : "nav-item"
+                }
+              >
+                <div className="nav-item-content">
+                  <Package className="icon" size={24} />
+                  <span className="nav-text">Inventario</span>
+                </div>
+              </NavLink>
+            </li>
+          )}
+
           {canViewConfiguracion && (
             <li>
               <NavLink
@@ -185,7 +204,13 @@ const Sidebar = () => {
             <span className="nav-text user-name">{userName}</span>
           </div>
         </div>
-        <button className="logout-btn" onClick={() => { localStorage.removeItem("user"); navigate("/"); }}>
+        <button
+          className="logout-btn"
+          onClick={() => {
+            localStorage.removeItem("user");
+            navigate("/");
+          }}
+        >
           <LogOut className="icon" size={24} />
           <span className="nav-text">Cerrar Sesión</span>
         </button>

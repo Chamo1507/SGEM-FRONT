@@ -1,26 +1,34 @@
 .formulario-eventos-wrapper {
   background: white;
   border-radius: 16px;
-  padding: 32px;
   box-shadow: 0 10px 30px rgba(12, 28, 62, 0.05);
   border: 1px solid rgba(12, 28, 62, 0.08);
   font-family: "Inter", sans-serif;
 }
 
 .formulario-header {
-  margin-bottom: 24px;
-  padding-bottom: 16px;
+  background: var(--umad-blue);
+  border-radius: 16px 16px 0 0;
+  padding: 24px;
   border-bottom: 1px solid #e2e8f0;
 }
 
+.formulario-line {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 4px;
+  background: var(--umad-red);
+}
+
 .formulario-header h2 {
-  color: var(--umad-blue, #0c1c3e);
+  color: var(--umad-white);
   margin: 0 0 8px 0;
   font-size: 1.5rem;
 }
 
 .formulario-header p {
-  color: #64748b;
+  color: var(--umad-text-muted);
   margin: 0;
 }
 
@@ -45,11 +53,15 @@
   height: auto; /* Ajusta la altura automáticamente según el contenido */
 }
 
+.form-section-subtitle {
+  padding-bottom: 8px;
+}
+
 .section-title-wrap h3 {
-  color: var(--umad-red, #a81934);
+  color: var(--umad-blue);
   margin: 0 0 20px 0;
   font-size: 1.1rem;
-  border-bottom: 2px solid rgba(168, 25, 52, 0.1);
+  border-bottom: 1px solid var(--umad-text-muted, 0.1);
   padding-bottom: 8px;
   text-align: center;
 }
@@ -58,6 +70,19 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
+}
+
+.Invitados-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.add-invitado-btn {
+  background: var(--umad-blue);
+  color: white;
+  cursor: pointer;
 }
 
 .two-cards-grid {
@@ -173,13 +198,46 @@ input[type="radio"] {
 
 .invitado-row {
   display: grid;
-  grid-template-columns: 1fr 1fr auto; /* Dos columnas para inputs y una para el botón */
+  grid-template-columns: 1fr 1fr 1fr; /* Dos columnas para inputs y una para el botón */
   gap: 16px;
   align-items: end; /* Alinea el botón con la base de los inputs */
   margin-bottom: 16px;
   padding: 16px;
   background: white;
   border-radius: 8px;
+}
+
+/* Botones pequeños para listas dinámicas */
+.add-btn-small {
+  background: var(--umad-blue);
+  color: white;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  border: none;
+}
+
+.add-btn-small:hover {
+  background: #091530;
+}
+
+.delete-btn-small {
+  background: #ef4444; /* red-500 */
+  color: white;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  margin: 0;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-btn-small:hover {
+  background: #dc2626; /* red-600 */
 }
 
 /* Botón de agregar */
