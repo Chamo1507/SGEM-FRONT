@@ -57,10 +57,10 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
           axios.get(`${import.meta.env.VITE_API_URL}/proveedores`),
         ]);
         
-        let pOptions = plantelesRes.data.map(p => ({ value: p.nombre_plantel, label: p.nombre_plantel }));
+        let pOptions = plantelesRes.data.map(p => ({ value: p.id_plantel, label: p.nombre_plantel }));
         setOpcPlanteles(pOptions);
 
-        let eOptions = espaciosRes.data.map(e => ({ value: e.nombre_espacio, label: e.nombre_espacio }));
+        let eOptions = espaciosRes.data.map(e => ({ value: e.id_espacio, label: e.nombre_espacio }));
         setOpcAreas(eOptions);
         
         setOpcProveedores(provsRes.data.map(p => ({ 
