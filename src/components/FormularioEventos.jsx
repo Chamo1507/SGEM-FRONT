@@ -58,13 +58,13 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
         ]);
 
         let pOptions = plantelesRes.data.map((p) => ({
-          value: p.nombre_plantel,
+          value: p.id_plantel,
           label: p.nombre_plantel,
         }));
         setOpcPlanteles(pOptions);
 
         let eOptions = espaciosRes.data.map((e) => ({
-          value: e.nombre_espacio,
+          value: e.id_espacio,
           label: e.nombre_espacio,
         }));
         setOpcAreas(eOptions);
@@ -141,8 +141,31 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
         }
       }
 
-      let payload = {
+      let fechaFormateada = data.fecha;
+      if (data.fecha instanceof Date) {
+        const offset = data.fecha.getTimezoneOffset();
+        fechaFormateada = new Date(data.fecha.getTime() - offset * 60000)
+          .toISOString()
+          .split("T")[0];
+      } else if (typeof data.fecha === "string" && data.fecha.includes("T")) {
+        fechaFormateada = data.fecha.split("T")[0];
+      }
+
+      const payload = {
         ...data,
+        nombre: data.nombre,
+        comentarios: data.comentarios,
+        objetivo: data.objetivo,
+        publicoobjetivo_eventos: data.publico,
+        fecha: fechaFormateada,
+        hora: data.hora,
+        horaFin: data.horaFin,
+        horaApartado: data.horaApartado,
+        prioridad: data.prioridad || "Media",
+        id_usuario: user?.id_usuario,
+        plantel: data.plantel,
+        area: data.area,
+        ids_areas_apoyo: finalProveedoresIds,
         proveedoresIds: finalProveedoresIds,
         id_usuario: user?.id_usuario || null,
         google_calendar_id,
@@ -259,14 +282,12 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
             <Input
               label="Nombre del Evento"
               placeholder="Ej.: Conferencia de Tecnología"
-              required={true}
               error={errors.nombre?.message}
               {...register("nombre", { required: "Obligatorio" })}
             />
 
             <Input
               label="Público Objetivo"
-              required={true}
               error={errors.publico?.message}
               {...register("publico", { required: "Obligatorio" })}
             />
@@ -287,7 +308,6 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
                 <div key={field.id} className="invitado-row">
                   <Input
                     label="Autoridad Asistente"
-                    required={true}
                     {...register(`invitados.${index}.nombre`, {
                       required: "Obligatorio",
                     })}
@@ -328,7 +348,6 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
 
             <Textarea
               label="Descripción del Evento"
-              required={true}
               error={errors.comentarios?.message}
               {...register("comentarios", { required: "Obligatorio" })}
             />
@@ -369,7 +388,6 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
                 <Input
                   label="Hora de Apartado"
                   type="time"
-                  required={true}
                   error={errors.horaApartado?.message}
                   {...register("horaApartado", {
                     required: "Requerida",
@@ -382,14 +400,12 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
                 <Input
                   label="Hora de Inicio"
                   type="time"
-                  required={true}
                   error={errors.hora?.message}
                   {...register("hora", { required: "Requerida" })}
                 />
                 <Input
                   label="Fin del Evento"
                   type="time"
-                  required={true}
                   error={errors.horaFin?.message}
                   {...register("horaFin", {
                     required: "Requerida",
@@ -403,7 +419,6 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
                 <Input
                   label="Plantel del Evento"
                   placeholder="Escribe o selecciona de la lista..."
-                  required={true}
                   list="planteles-list"
                   error={errors.plantel?.message}
                   {...register("plantel", { required: "Obligatorio" })}
@@ -417,7 +432,6 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
                 <Input
                   label="Área a utilizar"
                   placeholder="Escribe o selecciona de la lista..."
-                  required={true}
                   list="areas-list"
                   error={errors.area?.message}
                   {...register("area", { required: "Obligatorio" })}
@@ -439,7 +453,6 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
 
             <Input
               label="Objetivo Académico"
-              required={true}
               error={errors.objetivo?.message}
               {...register("objetivo", { required: "Obligatorio" })}
             />
@@ -473,7 +486,6 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
                       <div key={field.id} className="invitado-row">
                         <Input
                           label="Nombre del Proveedor"
-                          required={true}
                           {...register(`nuevosProveedores.${index}.nombre`, {
                             required: "Obligatorio",
                           })}
@@ -528,9 +540,7 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
                         <Select
                           label="Proveedor"
                           options={opcProveedores}
-                          required={true}
                           {...register(`proveedores.${index}.id`, {
-                            required: "Obligatorio",
                             onChange: (e) => {
                               const selectedId = e.target.value;
                               const prov = opcProveedores.find(
