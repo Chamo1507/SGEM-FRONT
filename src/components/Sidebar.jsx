@@ -23,7 +23,7 @@ const Sidebar = () => {
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
-    setUserRol(user.id_rol);
+    setUserRol(Number(user.id_rol));
     if (user.nombre_usuario) {
       setUserName(user.nombre_usuario);
     }
@@ -172,6 +172,22 @@ const Sidebar = () => {
                 <div className="nav-item-content">
                   <Package className="icon" size={24} />
                   <span className="nav-text">Inventario</span>
+                </div>
+              </NavLink>
+            </li>
+          )}
+
+          {canViewInventario && (
+            <li>
+              <NavLink
+                to="/eventos/proveedores"
+                className={({ isActive }) =>
+                  isActive ? "nav-item active" : "nav-item"
+                }
+              >
+                <div className="nav-item-content">
+                  <Users className="icon" size={24} />
+                  <span className="nav-text">Proveedores</span>
                 </div>
               </NavLink>
             </li>

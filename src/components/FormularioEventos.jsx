@@ -135,8 +135,8 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
       // Collect explicitly selected existing providers
       if (isAdmin && data.proveedores && data.proveedores.length > 0) {
         for (const prov of data.proveedores) {
-          if (prov.id) {
-            finalProveedoresIds.push(Number(prov.id));
+          if (prov.proveedorId) {
+            finalProveedoresIds.push(Number(prov.proveedorId));
           }
         }
       }
@@ -460,58 +460,6 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
             {isAdmin && (
               <>
                 <div className="checkbox-group mt-3">
-                  <div className="proveedor-extra-section">
-                    <div
-                      className="section-header-inline"
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        marginBottom: "16px",
-                      }}
-                    >
-                      <p style={{ margin: 0 }}>
-                        <strong>¿Crear nuevo proveedor?</strong>
-                      </p>
-                      <Btn
-                        className="add-btn-small"
-                        type="button"
-                        texto="+ Añadir"
-                        onClick={() =>
-                          appendNuevoProveedor({ nombre: "", correo: "" })
-                        }
-                      />
-                    </div>
-                    {nuevosProveedoresFields.map((field, index) => (
-                      <div key={field.id} className="invitado-row">
-                        <Input
-                          label="Nombre del Proveedor"
-                          {...register(`nuevosProveedores.${index}.nombre`, {
-                            required: "Obligatorio",
-                          })}
-                        />
-                        <Input
-                          label="Correo del Proveedor"
-                          {...register(`nuevosProveedores.${index}.correo`)}
-                        />
-                        <Input
-                          label="Teléfono del Proveedor"
-                          {...register(`nuevosProveedores.${index}.telefono`)}
-                        />
-                        <Input
-                          label="Servicio del Proveedor"
-                          {...register(`nuevosProveedores.${index}.servicio`)}
-                        />
-                        <Btn
-                          className="delete-btn-small"
-                          type="button"
-                          texto="Eliminar"
-                          onClick={() => removeNuevoProveedor(index)}
-                        />
-                      </div>
-                    ))}
-                  </div>
-
                   <div
                     className="proveedor-extra-section"
                     style={{ marginTop: "20px" }}
@@ -532,7 +480,7 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
                         className="add-btn-small"
                         type="button"
                         texto="+ Añadir"
-                        onClick={() => appendProveedor({ id: "", correo: "" })}
+                        onClick={() => appendProveedor({ proveedorId: "", correo: "" })}
                       />
                     </div>
                     {proveedoresFields.map((field, index) => (
@@ -540,16 +488,17 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
                         <Select
                           label="Proveedor"
                           options={opcProveedores}
-                          {...register(`proveedores.${index}.id`, {
+                          {...register(`proveedores.${index}.proveedorId`, {
                             onChange: (e) => {
                               const selectedId = e.target.value;
                               const prov = opcProveedores.find(
-                                (p) => p.value == selectedId,
+                                (p) => String(p.value) === String(selectedId),
                               );
                               if (prov) {
                                 setValue(
                                   `proveedores.${index}.correo`,
                                   prov.correo,
+                                  { shouldDirty: true, shouldTouch: true }
                                 );
                               }
                             },
