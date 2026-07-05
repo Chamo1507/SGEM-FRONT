@@ -109,37 +109,7 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
       const user = JSON.parse(localStorage.getItem("user"));
       const google_calendar_id = user?.google_calendar_id;
 
-      // Check if admin is adding new providers
-      let finalProveedoresIds = [...(data.proveedoresIds || [])];
-
-      // Save newly created providers
-      if (
-        isAdmin &&
-        data.nuevosProveedores &&
-        data.nuevosProveedores.length > 0
-      ) {
-        for (const prov of data.nuevosProveedores) {
-          if (prov.nombre) {
-            const provRes = await axios.post(
-              `${import.meta.env.VITE_API_URL}/proveedores`,
-              {
-                nombre_proveedor: prov.nombre,
-                correo_proveedor: prov.correo || "",
-              },
-            );
-            finalProveedoresIds.push(provRes.data.id_proveedor);
-          }
-        }
-      }
-
-      // Collect explicitly selected existing providers
-      if (isAdmin && data.proveedores && data.proveedores.length > 0) {
-        for (const prov of data.proveedores) {
-          if (prov.proveedorId) {
-            finalProveedoresIds.push(Number(prov.proveedorId));
-          }
-        }
-      }
+      let finalProveedoresIds = [];
 
       let fechaFormateada = data.fecha;
       if (data.fecha instanceof Date) {
@@ -178,7 +148,7 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
       };
 
       if (eventoEditando) {
-        // await axios.put(`${import.meta.env.VITE_API_URL}/eventos/${eventoEditando.id}`, payload);
+        await axios.patch(`${import.meta.env.VITE_API_URL}/eventos/${eventoEditando.id}`, payload);
       } else {
         await axios.post(`${import.meta.env.VITE_API_URL}/eventos`, payload);
       }
@@ -468,73 +438,7 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
               {...register("objetivo", { required: "Obligatorio" })}
             />
 
-            {isAdmin && (
-              <>
-                <div className="checkbox-group mt-3">
-                  <div
-                    className="proveedor-extra-section"
-                    style={{ marginTop: "20px" }}
-                  >
-                    <div
-                      className="section-header-inline"
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        marginBottom: "16px",
-                      }}
-                    >
-                      <p style={{ margin: 0 }}>
-                        <strong>¿Agregar proveedor existente?</strong>
-                      </p>
-                      <Btn
-                        className="add-btn-small"
-                        type="button"
-                        texto="+ Añadir"
-                        onClick={() =>
-                          appendProveedor({ proveedorId: "", correo: "" })
-                        }
-                      />
-                    </div>
-                    {proveedoresFields.map((field, index) => (
-                      <div key={field.id} className="invitado-row">
-                        <Select
-                          label="Proveedor"
-                          options={opcProveedores}
-                          {...register(`proveedores.${index}.proveedorId`, {
-                            onChange: (e) => {
-                              const selectedId = e.target.value;
-                              const prov = opcProveedores.find(
-                                (p) => String(p.value) === String(selectedId),
-                              );
-                              if (prov) {
-                                setValue(
-                                  `proveedores.${index}.correo`,
-                                  prov.correo,
-                                  { shouldDirty: true, shouldTouch: true },
-                                );
-                              }
-                            },
-                          })}
-                        />
-                        <Input
-                          label="Correo del Proveedor"
-                          readOnly
-                          style={{ backgroundColor: "#f1f5f9" }}
-                          {...register(`proveedores.${index}.correo`)}
-                        />
-                        <Btn
-                          className="delete-btn-small"
-                          type="button"
-                          texto="Eliminar"
-                          onClick={() => removeProveedor(index)}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
+
           </section>
 
           <div className="two-cards">
