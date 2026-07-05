@@ -152,7 +152,6 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
       }
 
       const payload = {
-        ...data,
         nombre: data.nombre,
         comentarios: data.comentarios,
         objetivo: data.objetivo,
@@ -162,13 +161,20 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
         horaFin: data.horaFin,
         horaApartado: data.horaApartado,
         prioridad: data.prioridad || "Media",
-        id_usuario: user?.id_usuario,
         plantel: data.plantel,
         area: data.area,
-        ids_areas_apoyo: finalProveedoresIds,
         proveedoresIds: finalProveedoresIds,
         id_usuario: user?.id_usuario || null,
-        google_calendar_id,
+        invitados: data.invitados,
+        fotografiaResena: data.fotografiaResena,
+        apoyoAcceso: data.apoyoAcceso,
+        apoyoMantenimiento: data.apoyoMantenimiento,
+        Mantenimiento: data.Mantenimiento,
+        apoyoAudiovisual: data.apoyoAudiovisual,
+        equiposAudiovisuales: data.equiposAudiovisuales,
+        estatus: data.estatus,
+        responsable: data.responsable,
+        publico: data.publico,
       };
 
       if (eventoEditando) {
@@ -189,7 +195,12 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
       reset();
     } catch (error) {
       console.error(error);
-      alert("Ocurrió un error al guardar el evento.");
+      const backendError =
+        error.response?.data?.message ||
+        "Ocurrió un error al guardar el evento.";
+      alert(
+        `Ocurrió un error: ${Array.isArray(backendError) ? backendError.join(", ") : backendError}`,
+      );
     }
   };
 
@@ -425,7 +436,7 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
                 />
                 <datalist id="planteles-list">
                   {opcPlanteles.map((p) => (
-                    <option key={p.value} value={p.value} />
+                    <option key={p.value} value={p.label} />
                   ))}
                 </datalist>
 
@@ -438,7 +449,7 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
                 />
                 <datalist id="areas-list">
                   {opcAreas.map((a) => (
-                    <option key={a.value} value={a.value} />
+                    <option key={a.value} value={a.label} />
                   ))}
                 </datalist>
               </div>
@@ -480,7 +491,9 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
                         className="add-btn-small"
                         type="button"
                         texto="+ Añadir"
-                        onClick={() => appendProveedor({ proveedorId: "", correo: "" })}
+                        onClick={() =>
+                          appendProveedor({ proveedorId: "", correo: "" })
+                        }
                       />
                     </div>
                     {proveedoresFields.map((field, index) => (
@@ -498,7 +511,7 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
                                 setValue(
                                   `proveedores.${index}.correo`,
                                   prov.correo,
-                                  { shouldDirty: true, shouldTouch: true }
+                                  { shouldDirty: true, shouldTouch: true },
                                 );
                               }
                             },
