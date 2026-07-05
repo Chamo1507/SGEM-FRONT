@@ -9,11 +9,13 @@ const ProximosEventos = () => {
   const [eventos, setEventos] = useState([]);
   const [filterMode, setFilterMode] = useState('all'); // 'all', 'coverage'
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isRoot, setIsRoot] = useState(false);
   const [canCreate, setCanCreate] = useState(false);
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
-    if (user.id_rol === 1) setIsAdmin(true);
+    if (user.id_rol === 1 || user.id_rol === 2) setIsAdmin(true);
+    if (user.id_rol === 1) setIsRoot(true);
     if (user.id_rol === 1 || user.id_rol === 3) setCanCreate(true);
     fetchEventos();
   }, []);
@@ -87,7 +89,7 @@ const ProximosEventos = () => {
   };
 
   const displayedEventos = filterMode === 'coverage' 
-    ? eventos.filter(e => e.requiereCobertura && e.estatus === 'pendiente') 
+    ? eventos.filter(e => e.requiereCobertura && e.estatus?.toLowerCase() === 'pendiente') 
     : eventos;
 
   return (
@@ -171,12 +173,16 @@ const ProximosEventos = () => {
                 )}
 
                 <div className="details-actions">
-                  <button className="btn-edit" onClick={handleEdit}>
-                    {isAdmin && selectedEvento.requiereCobertura ? '✏️ Asignar Cobertura / Editar' : '✏️ Editar Evento'}
-                  </button>
-                  <button className="btn-edit" style={{backgroundColor: '#dc3545', marginLeft: '10px'}} onClick={() => handleEliminar(selectedEvento)}>
-                    🗑️ Eliminar Evento
-                  </button>
+                  {(isRoot || (isAdmin && selectedEvento.requiereCobertura && selectedEvento.estatus?.toLowerCase() === 'pendiente') || canCreate) && (
+                    <button className="btn-edit" onClick={handleEdit}>
+                      {isAdmin && selectedEvento.requiereCobertura ? '✏️ Asignar Cobertura / Editar' : '✏️ Editar Evento'}
+                    </button>
+                  )}
+                  {(isRoot || canCreate) && (
+                    <button className="btn-edit" style={{backgroundColor: '#dc3545', marginLeft: '10px'}} onClick={() => handleEliminar(selectedEvento)}>
+                      🗑️ Eliminar Evento
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -185,28 +191,57 @@ const ProximosEventos = () => {
           <div className="eventos-list animation-fade-in">
             {displayedEventos.map((evento) => (
               <div key={evento.id} className="evento-card">
-                <div className="evento-card-header">
-                  <h3>{evento.nombre}</h3>
-                  <span className={`badge-estatus ${evento.estatus}`}>
-                    {evento.estatus}
-                  </span>
-                </div>
-                <div className="evento-card-body">
-                  <p><strong>Fecha:</strong> {evento.fecha} - {evento.hora}</p>
-                  <p><strong>Responsable:</strong> {evento.organizador}</p>
-                  {isAdmin && evento.requiereCobertura && (
-                     <p style={{color: '#ff9800', fontWeight: 'bold'}}>📸 Requiere Cobertura</p>
-                  )}
-                  <p className="evento-desc">{evento.comentarios}</p>
-                </div>
-                <div className="evento-card-footer" style={{display: 'flex', justifyContent: 'space-between', gap: '10px'}}>
-                  <button className="btn-acerca" style={{flex: 1}} onClick={() => handleViewDetails(evento)}>
-                    Ver detalles
-                  </button>
-                  <button className="btn-acerca" style={{flex: 1, backgroundColor: '#dc3545', color: 'white'}} onClick={() => handleEliminar(evento)}>
-                    Eliminar
-                  </button>
-                </div>
+                {filterMode === 'coverage' ? (
+                  <>
+                    <div className="evento-card-header">
+                      <h3>{evento.nombre}</h3>
+                      <span className={`badge-estatus ${evento.prioridad?.toLowerCase() === 'alto' ? 'alta' : 'baja'}`}>
+                        {evento.prioridad ? evento.prioridad.charAt(0).toUpperCase() + evento.prioridad.slice(1).toLowerCase() : 'Normal'}
+                      </span>
+                    </div>
+                    <div className="evento-card-body">
+                      <p><strong>Fecha:</strong> {evento.fecha}</p>
+                      <p><strong>Hora:</strong> {evento.hora} - {evento.horaFin}</p>
+                    </div>
+                    <div className="evento-card-footer" style={{display: 'flex', justifyContent: 'space-between', gap: '10px'}}>
+                      {(isRoot || isAdmin) && (
+                        <button className="btn-edit" style={{flex: 1}} onClick={() => { setSelectedEvento(evento); setViewMode('form'); }}>
+                          Editar evento
+                        </button>
+                      )}
+                      <button className="btn-acerca" style={{flex: 1}} onClick={() => handleViewDetails(evento)}>
+                        Ver detalles
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="evento-card-header">
+                      <h3>{evento.nombre}</h3>
+                      <span className={`badge-estatus ${evento.estatus}`}>
+                        {evento.estatus}
+                      </span>
+                    </div>
+                    <div className="evento-card-body">
+                      <p><strong>Fecha:</strong> {evento.fecha} - {evento.hora}</p>
+                      <p><strong>Responsable:</strong> {evento.organizador}</p>
+                      {isAdmin && evento.requiereCobertura && (
+                        <p style={{color: '#ff9800', fontWeight: 'bold'}}>📸 Requiere Cobertura</p>
+                      )}
+                      <p className="evento-desc">{evento.comentarios}</p>
+                    </div>
+                    <div className="evento-card-footer" style={{display: 'flex', justifyContent: 'space-between', gap: '10px'}}>
+                      <button className="btn-acerca" style={{flex: 1}} onClick={() => handleViewDetails(evento)}>
+                        Ver detalles
+                      </button>
+                      {(isRoot || canCreate) && (
+                        <button className="btn-acerca" style={{flex: 1, backgroundColor: '#dc3545', color: 'white'}} onClick={() => handleEliminar(evento)}>
+                          Eliminar
+                        </button>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
             ))}
           </div>
@@ -215,7 +250,7 @@ const ProximosEventos = () => {
             <div className="empty-icon">📅</div>
             <h3>No hay eventos en esta vista</h3>
             <p>No se encontraron eventos con los filtros actuales.</p>
-            {filterMode !== 'coverage' && (
+            {filterMode !== 'coverage' && canCreate && (
               <button className="btn-primary" onClick={handleCreateNew}>
                 Crear tu primer evento
               </button>

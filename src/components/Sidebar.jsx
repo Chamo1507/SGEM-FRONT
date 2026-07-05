@@ -32,13 +32,13 @@ const Sidebar = () => {
   // Root = 1, Admin = 2, Coord = 3, Invitado = 4
   const canViewHome = userRol === 1 || userRol === 2;
   const canViewEventosList = userRol === 1 || userRol === 2 || userRol === 3;
-  const canViewDashboard = userRol === 1 || userRol === 2;
+  const canViewDashboard = userRol === 1;
   const canViewAsistencia = userRol === 1 || userRol === 3 || userRol === 4;
   const canViewEncuestaInvitado = userRol === 1 || userRol === 4;
   const canViewEncuestaOrganizador = userRol === 1 || userRol === 3;
   const canViewConfiguracion = userRol === 1 || userRol === 2;
-  const canViewInventario =
-    userRol === 1 || userRol === 2 || userRol === 3 || userRol === 4;
+  const canViewInventario = userRol === 1 || userRol === 2 || userRol === 3 || userRol === 4;
+  const canViewProveedores = userRol === 1 || userRol === 2 || userRol === 3 || userRol === 4;
 
   return (
     <aside className={`sidebar ${isCollapsed ? "collapsed" : ""}`}>
