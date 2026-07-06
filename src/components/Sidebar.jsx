@@ -23,7 +23,7 @@ const Sidebar = () => {
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
-    setUserRol(user.id_rol);
+    setUserRol(Number(user.id_rol));
     if (user.nombre_usuario) {
       setUserName(user.nombre_usuario);
     }
@@ -32,13 +32,13 @@ const Sidebar = () => {
   // Root = 1, Admin = 2, Coord = 3, Invitado = 4
   const canViewHome = userRol === 1 || userRol === 2;
   const canViewEventosList = userRol === 1 || userRol === 2 || userRol === 3;
-  const canViewDashboard = userRol === 1 || userRol === 2;
+  const canViewDashboard = userRol === 1;
   const canViewAsistencia = userRol === 1 || userRol === 3 || userRol === 4;
   const canViewEncuestaInvitado = userRol === 1 || userRol === 4;
   const canViewEncuestaOrganizador = userRol === 1 || userRol === 3;
   const canViewConfiguracion = userRol === 1 || userRol === 2;
-  const canViewInventario =
-    userRol === 1 || userRol === 2 || userRol === 3 || userRol === 4;
+  const canViewInventario = userRol === 1 || userRol === 2 || userRol === 3 || userRol === 4;
+  const canViewProveedores = userRol === 1 || userRol === 2 || userRol === 3 || userRol === 4;
 
   return (
     <aside className={`sidebar ${isCollapsed ? "collapsed" : ""}`}>
@@ -172,6 +172,22 @@ const Sidebar = () => {
                 <div className="nav-item-content">
                   <Package className="icon" size={24} />
                   <span className="nav-text">Inventario</span>
+                </div>
+              </NavLink>
+            </li>
+          )}
+
+          {canViewInventario && (
+            <li>
+              <NavLink
+                to="/eventos/proveedores"
+                className={({ isActive }) =>
+                  isActive ? "nav-item active" : "nav-item"
+                }
+              >
+                <div className="nav-item-content">
+                  <Users className="icon" size={24} />
+                  <span className="nav-text">Proveedores</span>
                 </div>
               </NavLink>
             </li>

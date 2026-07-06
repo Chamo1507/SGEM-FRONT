@@ -217,7 +217,7 @@ const Register = () => {
                     value="2"
                     {...register("id_rol", { required: true })}
                   />{" "}
-                  Coordinador
+                  Administrador
                 </label>
                 <label className="remember-me">
                   <input
@@ -225,7 +225,7 @@ const Register = () => {
                     value="3"
                     {...register("id_rol", { required: true })}
                   />{" "}
-                  Invitado
+                  Coordinador
                 </label>
                 <label className="remember-me">
                   <input
@@ -233,7 +233,7 @@ const Register = () => {
                     value="4"
                     {...register("id_rol", { required: true })}
                   />{" "}
-                  Administrativo
+                  Invitado
                 </label>
               </div>
               {errors.id_rol && (

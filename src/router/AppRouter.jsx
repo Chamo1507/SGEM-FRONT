@@ -12,6 +12,7 @@ import ConfirmarAsistencia from "../pages/ConfirmarAsistencia";
 import EncuestaInvitado from "../pages/EncuestaInvitado";
 import EncuestaOrganizador from "../pages/EncuestaOrganizador";
 import Inventario from "../components/Inventario";
+import CProveedores from "../components/CProveedores";
 
 const AppRouter = () => {
   return (
@@ -36,6 +37,7 @@ const AppRouter = () => {
             element={<EncuestaOrganizador />}
           />
           <Route path="/eventos/inventario" element={<Inventario />} />
+          <Route path="/eventos/proveedores" element={<CProveedores />} />
         </Route>
       </Routes>
     </BrowserRouter>
