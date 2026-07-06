@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   AreaChart,
   Area,
@@ -22,7 +23,6 @@ const UsersIcon = ({ size = 24 }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
 );
 
-// Datos Harcodeados
 const metrics = {
   eventosSemana: 3,
   eventosAno: 45,
@@ -45,37 +45,37 @@ const chartData = [
 ];
 
 const eventosRecientes = [
-  {
-    id: 1,
-    nombre: "Conferencia Anual de Tecnología",
-    fecha: "28 Jun 2026",
-    asistentes: 300,
-    estado: "proximo",
-  },
-  {
-    id: 2,
-    nombre: "Taller de Liderazgo",
-    fecha: "15 Jun 2026",
-    asistentes: 45,
-    estado: "completado",
-  },
-  {
-    id: 3,
-    nombre: "Simposio de Salud Mental",
-    fecha: "05 Jul 2026",
-    asistentes: 150,
-    estado: "proximo",
-  },
-  {
-    id: 4,
-    nombre: "Feria de Emprendimiento",
-    fecha: "10 May 2026",
-    asistentes: 500,
-    estado: "completado",
-  },
+  { id: 1, nombre: "Conferencia Anual de Tecnología", fecha: "28 Jun 2026", asistentes: 300, estado: "proximo" },
+  { id: 2, nombre: "Taller de Liderazgo", fecha: "15 Jun 2026", asistentes: 45, estado: "completado" },
+  { id: 3, nombre: "Simposio de Salud Mental", fecha: "05 Jul 2026", asistentes: 150, estado: "proximo" },
+  { id: 4, nombre: "Feria de Emprendimiento", fecha: "10 May 2026", asistentes: 500, estado: "completado" },
 ];
 
 const Dashboard = () => {
+  // 👇 Capturamos los query parameters de la URL (?google=success)
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    const status = searchParams.get("google");
+
+    if (status === "success") {
+      alert("🎉 ¡Cuenta de Google Calendar vinculada con éxito! Tus eventos ahora se sincronizarán de forma automática.");
+      
+      // Actualizamos el estado del LocalStorage simulando los tokens activos para refrescar la interfaz
+      const localUser = JSON.parse(localStorage.getItem("user")) || {};
+      localUser.google_refresh_token = "active_oauth_token";
+      localStorage.setItem("user", JSON.stringify(localUser));
+
+      // Limpiamos los parámetros de la URL para que quede estético (/eventos/dashboard)
+      searchParams.delete("google");
+      setSearchParams(searchParams);
+    } else if (status === "error") {
+      alert("❌ Hubo un fallo en la vinculación o se rechazaron los permisos de Google.");
+      searchParams.delete("google");
+      setSearchParams(searchParams);
+    }
+  }, [searchParams, setSearchParams]);
+
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">

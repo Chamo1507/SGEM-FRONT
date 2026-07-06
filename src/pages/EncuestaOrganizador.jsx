@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import axios from 'axios';
 import Form from '../components/CFormulario';
 import Select from '../components/CSelect';
 import Textarea from '../components/CTextarea';
@@ -15,11 +16,24 @@ const EncuestaOrganizador = () => {
     reset();
   };
 
-  const opcEventos = [
-    { value: 'conferencia-tech', label: 'Conferencia Anual de Tecnología' },
-    { value: 'taller-liderazgo', label: 'Taller de Liderazgo' },
-    { value: 'simposio-salud', label: 'Simposio de Salud Mental' },
-  ];
+  const [opcEventos, setOpcEventos] = useState([]);
+
+  useEffect(() => {
+    const fetchEventos = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/eventos`);
+        const eventosActivos = response.data.filter(e => e.id_estatus_evento !== 3);
+        const options = eventosActivos.map(ev => ({
+          value: ev.id_evento.toString(),
+          label: `${ev.nombre_evento} - ${ev.fecha_evento}`
+        }));
+        setOpcEventos(options);
+      } catch (error) {
+        console.error("Error al cargar eventos:", error);
+      }
+    };
+    fetchEventos();
+  }, []);
 
   const opcEvaluacion = [
     { value: 'excelente', label: 'Excelente' },
