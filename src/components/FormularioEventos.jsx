@@ -44,9 +44,11 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
   const [opcAreas, setOpcAreas] = useState([]);
   const [opcProveedores, setOpcProveedores] = useState([]);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [currentUser, setCurrentUser] = useState({});
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
+    setCurrentUser(user);
     if (user.id_rol === 1 || user.id_rol === 2) setIsAdmin(true);
 
     const fetchData = async () => {
@@ -240,17 +242,19 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
         <div className="form-sections-grid">
           <section className="form-section">
             <div className="section-title-wrap">
-              <h3>Datos del área solicitante</h3>
+              <h3>Datos del solicitante</h3>
             </div>
 
-            <h2 className="form-section-subtitle">Área solicitante: Root</h2>
-
             <h2 className="form-section-subtitle">
-              Responsable del área: Root
+              Rol / Área: {currentUser?.nombre_rol || 'No asignado'}
             </h2>
 
             <h2 className="form-section-subtitle">
-              Correo del responsable: Root@umad.edu.mx
+              Responsable: {currentUser?.nombre_usuario} {currentUser?.apellidop_usuario} {currentUser?.apellidom_usuario || ""}
+            </h2>
+
+            <h2 className="form-section-subtitle">
+              Correo: {currentUser?.correo_usuario || "No disponible"}
             </h2>
           </section>
 
@@ -315,6 +319,7 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
                   />
                   <Select
                     label="Tipo de Autoridad"
+                    options={opcTiposAutoridad}
                     {...register(`invitados.${index}.nivelAutoridad`)}
                   />
                   <Btn
