@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import axios from 'axios';
 import Form from '../components/CFormulario';
 import Input from '../components/CInput';
 import Select from '../components/CSelect';
@@ -8,18 +9,41 @@ import './ConfirmarAsistencia.css';
 
 const ConfirmarAsistencia = () => {
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
+  const [opcEventos, setOpcEventos] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const handleFormSubmit = (data) => {
-    console.log("Asistencia Confirmada:", data);
-    alert("¡Tu asistencia ha sido confirmada con éxito!");
-    reset();
+  useEffect(() => {
+    const fetchEventos = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/eventos`);
+        // Filtrar eventos cancelados si es necesario o mostrarlos todos. Aquí mostramos los no cancelados.
+        const eventosActivos = response.data.filter(e => e.id_estatus_evento !== 3);
+        const options = eventosActivos.map(ev => ({
+          value: ev.id_evento.toString(),
+          label: `${ev.nombre_evento} - ${ev.fecha_evento}`
+        }));
+        setOpcEventos(options);
+      } catch (error) {
+        console.error("Error al cargar eventos:", error);
+      }
+    };
+    fetchEventos();
+  }, []);
+
+  const handleFormSubmit = async (data) => {
+    setLoading(true);
+    try {
+      await axios.post(`${import.meta.env.VITE_API_URL}/eventos/${data.evento}/asistencia`, data);
+      alert("¡Tu asistencia ha sido confirmada con éxito!");
+      reset();
+    } catch (error) {
+      console.error("Error confirmando asistencia:", error);
+      alert("Hubo un error al confirmar tu asistencia. Intenta nuevamente.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const opcEventos = [
-    { value: 'conferencia-tech', label: 'Conferencia Anual de Tecnología' },
-    { value: 'taller-liderazgo', label: 'Taller de Liderazgo' },
-    { value: 'simposio-salud', label: 'Simposio de Salud Mental' },
-  ];
 
   return (
     <div className="asistencia-container">
@@ -76,7 +100,7 @@ const ConfirmarAsistencia = () => {
             </div>
 
             <div className="action-button">
-              <Btn type="submit" texto="Confirmar Asistencia" />
+              <Btn type="submit" texto={loading ? "Enviando..." : "Confirmar Asistencia"} disabled={loading} />
             </div>
           </div>
         </Form>
