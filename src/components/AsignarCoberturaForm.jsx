@@ -12,6 +12,8 @@ const AsignarCoberturaForm = ({ evento, onSave, onCancel }) => {
   const { register, handleSubmit, control, setValue } = useForm({
     defaultValues: {
       proveedores: [],
+      prioridad: evento.prioridad || "Media",
+      estatus: evento.estatus === "pendiente" ? "Confirmado" : (evento.estatus || "Confirmado")
     },
   });
 
@@ -61,7 +63,9 @@ const AsignarCoberturaForm = ({ evento, onSave, onCancel }) => {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       await axios.patch(`${import.meta.env.VITE_API_URL}/eventos/${evento.id}/cobertura`, {
         proveedoresIds: finalProveedoresIds,
-        id_usuario: user.id_usuario
+        id_usuario: user.id_usuario,
+        prioridad: data.prioridad,
+        estatus: data.estatus
       });
 
       alert("¡Cobertura asignada con éxito!");
@@ -82,6 +86,31 @@ const AsignarCoberturaForm = ({ evento, onSave, onCancel }) => {
 
       <Form onSubmit={handleSubmit(onSubmit)}>
         <section className="form-section">
+          <div className="section-header-inline" style={{ display: "flex", gap: "20px", marginBottom: "16px" }}>
+            <div style={{flex: 1}}>
+              <Select
+                label="Prioridad"
+                options={[
+                  { value: "Alta", label: "Alta" },
+                  { value: "Media", label: "Normal / Media" },
+                  { value: "Baja", label: "Baja" }
+                ]}
+                {...register("prioridad")}
+              />
+            </div>
+            <div style={{flex: 1}}>
+              <Select
+                label="Estado"
+                options={[
+                  { value: "Confirmado", label: "Confirmado" },
+                  { value: "Pendiente", label: "Pendiente" },
+                  { value: "Cancelado", label: "Cancelado" }
+                ]}
+                {...register("estatus")}
+              />
+            </div>
+          </div>
+
           <div className="proveedor-extra-section" style={{ marginTop: "20px" }}>
             <div className="section-header-inline" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
               <p style={{ margin: 0 }}><strong>¿Agregar proveedor existente?</strong></p>

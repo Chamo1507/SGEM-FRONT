@@ -1,6 +1,32 @@
+import { useState } from "react";
 import "./Configuracion.css";
 
 const Configuracion = () => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  const estaVinculado = !!(user?.google_refresh_token || user?.google_access_token);
+
+  const manejarConexionGoogle = async () => {
+    if (!user?.id_usuario) {
+      return alert("Por favor inicia sesión primero.");
+    }
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/eventos/google/url?id_usuario=${user.id_usuario}`
+      );
+      const datos = await response.json();
+
+      if (datos.url) {
+        window.location.href = datos.url;
+      } else {
+        alert("No se pudo generar la URL de autenticación.");
+      }
+    } catch (error) {
+      console.error("Error al conectar con Google:", error);
+      alert("Error de comunicación con el servidor del sistema.");
+    }
+  };
+
   return (
     <div className="config-page">
       <div className="config-header">
@@ -14,63 +40,40 @@ const Configuracion = () => {
           <div className="config-card">
             <div className="form-group">
               <label>Nombre completo</label>
-              <input type="text" placeholder="Tu nombre" />
+              <input type="text" placeholder="Tu nombre" defaultValue={`${user?.nombre_usuario || ''} ${user?.apellidop_usuario || ''}`} />
             </div>
             <div className="form-group">
               <label>Correo institucional</label>
-              <input type="email" placeholder="ejemplo@umad.edu.mx" disabled />
+              <input type="email" placeholder="ejemplo@umad.edu.mx" defaultValue={user?.correo_usuario || ""} disabled />
             </div>
             <button className="save-btn">Guardar Cambios</button>
           </div>
         </section>
 
+        {/*SECCIÓN ACTUALIZADA: INTEGRACIÓN OAUTH2 CON GOOGLE */}
         <section className="config-section">
           <h2>Integración con Google Calendar</h2>
           <div className="config-card">
-            <p className="config-description" style={{marginBottom: "1rem"}}>
-              Para que el sistema agende eventos en tu Google Calendar, por favor comparte tu calendario con nuestra cuenta de servicio: 
-              <br/>
-              <strong>nestjs-calendar@sgm-comunicacion.iam.gserviceaccount.com</strong>
-              <br/><br/>
-              Una vez compartido, ingresa tu correo de Google a continuación para vincularlo.
+            <p className="config-description" style={{ marginBottom: "1.5rem", color: "#64748b" }}>
+              Sincroniza tus eventos directamente en tu cuenta institucional o personal. Al activarlo, cada vez que agendes un evento en el sistema, aparecerá reflejado en tu calendario de Google en tiempo real.
             </p>
-            <div className="form-group">
-              <label>ID de Google Calendar (Tu Correo Gmail)</label>
-              <input 
-                type="email" 
-                placeholder="tu.correo@gmail.com" 
-                id="gcal-input"
-                defaultValue={JSON.parse(localStorage.getItem("user"))?.google_calendar_id || JSON.parse(localStorage.getItem("user"))?.correo_usuario || ""}
-              />
-            </div>
-            <button className="save-btn" onClick={async () => {
-              const email = document.getElementById("gcal-input").value;
-              if (!email) return alert("Por favor ingresa un correo");
-              const user = JSON.parse(localStorage.getItem("user"));
-              if (!user?.id_usuario) return alert("Por favor inicia sesión primero");
 
-              try {
-                // Update in backend
-                const response = await fetch(`${import.meta.env.VITE_API_URL}/usuarios/${user.id_usuario}/google-calendar`, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ google_calendar_id: email })
-                });
-                if (response.ok) {
-                  // Update local storage
-                  user.google_calendar_id = email;
-                  localStorage.setItem("user", JSON.stringify(user));
-                  alert("Cuenta de Google Calendar vinculada exitosamente.");
-                } else {
-                  alert("Hubo un error al vincular la cuenta.");
-                }
-              } catch (error) {
-                console.error(error);
-                alert("Error de conexión con el servidor.");
-              }
-            }}>
-              Vincular Google Calendar
-            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+              <button 
+                className={`save-btn ${estaVinculado ? "connected" : ""}`} 
+                onClick={manejarConexionGoogle}
+                style={{
+                  backgroundColor: estaVinculado ? "#10b981" : "#0c1c3e",
+                  color: "#ffffff"
+                }}
+              >
+                {estaVinculado ? "🔄 Re-vincular Cuenta de Google" : "🔴 Vincular con Google Calendar"}
+              </button>
+
+              <span style={{ fontSize: "0.9rem", fontWeight: "600", color: estaVinculado ? "#10b981" : "#64748b" }}>
+                Estado: {estaVinculado ? "✅ Sincronizado" : "❌ No vinculado"}
+              </span>
+            </div>
           </div>
         </section>
 
