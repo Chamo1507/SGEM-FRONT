@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   AreaChart,
@@ -23,36 +24,30 @@ const UsersIcon = ({ size = 24 }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
 );
 
-const metrics = {
-  eventosSemana: 3,
-  eventosAno: 45,
-  asistentesTotales: 1250,
-};
 
-const chartData = [
-  { name: "Ene", eventos: 2 },
-  { name: "Feb", eventos: 4 },
-  { name: "Mar", eventos: 3 },
-  { name: "Abr", eventos: 6 },
-  { name: "May", eventos: 5 },
-  { name: "Jun", eventos: 8 },
-  { name: "Jul", eventos: 4 },
-  { name: "Ago", eventos: 2 },
-  { name: "Sep", eventos: 7 },
-  { name: "Oct", eventos: 5 },
-  { name: "Nov", eventos: 9 },
-  { name: "Dic", eventos: 6 },
-];
-
-const eventosRecientes = [
-  { id: 1, nombre: "Conferencia Anual de Tecnología", fecha: "28 Jun 2026", asistentes: 300, estado: "proximo" },
-  { id: 2, nombre: "Taller de Liderazgo", fecha: "15 Jun 2026", asistentes: 45, estado: "completado" },
-  { id: 3, nombre: "Simposio de Salud Mental", fecha: "05 Jul 2026", asistentes: 150, estado: "proximo" },
-  { id: 4, nombre: "Feria de Emprendimiento", fecha: "10 May 2026", asistentes: 500, estado: "completado" },
-];
 
 const Dashboard = () => {
-  // 👇 Capturamos los query parameters de la URL (?google=success)
+  const [metrics, setMetrics] = useState({ eventosSemana: 0, eventosAno: 0, asistentesTotales: 0 });
+  const [chartData, setChartData] = useState([]);
+  const [eventosRecientes, setEventosRecientes] = useState([]);
+
+  useEffect(() => {
+    const fetchDashboardStats = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/eventos/dashboard/stats`);
+        if (response.data) {
+          setMetrics(response.data.metrics || { eventosSemana: 0, eventosAno: 0, asistentesTotales: 0 });
+          setChartData(response.data.chartData || []);
+          setEventosRecientes(response.data.eventosRecientes || []);
+        }
+      } catch (error) {
+        console.error("Error fetching dashboard stats:", error);
+      }
+    };
+    fetchDashboardStats();
+  }, []);
+
+  // Y' Capturamos los query parameters de la URL (?google=success)
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
