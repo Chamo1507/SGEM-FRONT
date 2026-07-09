@@ -402,31 +402,19 @@ const FormularioEventos = ({ onSaveEvento, eventoEditando }) => {
                   })}
                 />
 
-                <Input
+                <Select
                   label="Plantel del Evento"
-                  placeholder="Escribe o selecciona de la lista..."
-                  list="planteles-list"
+                  options={opcPlanteles.map((p) => ({ value: p.label, label: p.label }))}
                   error={errors.plantel?.message}
                   {...register("plantel", { required: "Obligatorio" })}
                 />
-                <datalist id="planteles-list">
-                  {opcPlanteles.map((p) => (
-                    <option key={p.value} value={p.label} />
-                  ))}
-                </datalist>
 
-                <Input
+                <Select
                   label="Área a utilizar"
-                  placeholder="Escribe o selecciona de la lista..."
-                  list="areas-list"
+                  options={opcAreas.map((a) => ({ value: a.label, label: a.label }))}
                   error={errors.area?.message}
                   {...register("area", { required: "Obligatorio" })}
                 />
-                <datalist id="areas-list">
-                  {opcAreas.map((a) => (
-                    <option key={a.value} value={a.label} />
-                  ))}
-                </datalist>
               </div>
             </section>
           </div>
