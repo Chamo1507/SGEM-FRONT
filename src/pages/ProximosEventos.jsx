@@ -108,29 +108,34 @@ const ProximosEventos = () => {
   };
 
   const handleEliminar = async (evento) => {
-    if (
-      window.confirm(
-        "¿Estás seguro de que deseas eliminar este evento? También se cancelará en Google Calendar.",
-      )
-    ) {
+    const motivo = window.prompt(
+      "Ingresa el motivo de cancelación del evento (se notificará a los asistentes):"
+    );
+
+    if (motivo !== null) {
+      if (motivo.trim() === "") {
+        alert("Debes ingresar un motivo válido para cancelar el evento.");
+        return;
+      }
+
       try {
         const user = JSON.parse(localStorage.getItem("user"));
         const calendarId = user?.google_calendar_id || user?.correo_usuario;
         await axios.delete(
           `${import.meta.env.VITE_API_URL}/eventos/${evento.id}`,
           {
-            data: { calendarId },
+            data: { calendarId, motivo, id_usuario: user?.id_usuario || 1 },
           },
         );
-        alert("Evento eliminado exitosamente");
+        alert("Evento cancelado exitosamente y notificado a los asistentes");
         fetchEventos();
         if (selectedEvento?.id === evento.id) {
           setViewMode("list");
           setSelectedEvento(null);
         }
       } catch (error) {
-        console.error("Error al eliminar:", error);
-        alert("Ocurrió un error al intentar eliminar el evento");
+        console.error("Error al cancelar:", error);
+        alert("Ocurrió un error al intentar cancelar el evento");
       }
     }
   };
@@ -203,7 +208,7 @@ const ProximosEventos = () => {
                 color: filterMode === "coverage" ? "#fff" : "#333",
               }}
             >
-              Pendientes de Cobertura 🚨
+              Pendientes de Cobertura
             </button>
           </div>
         )}
@@ -237,14 +242,14 @@ const ProximosEventos = () => {
                   </span>
                 </div>
                 <div className="details-meta">
-                  <span>📅 {selectedEvento.fecha}</span>
+                  <span>{selectedEvento.fecha}</span>
                   <span>
-                    🕒 {selectedEvento.hora} - {selectedEvento.horaFin}
+                    {selectedEvento.hora} - {selectedEvento.horaFin}
                   </span>
                   <span>
-                    📍 {selectedEvento.plantel} - {selectedEvento.espacio}
+                    {selectedEvento.plantel} - {selectedEvento.espacio}
                   </span>
-                  <span>👤 Responsable: {selectedEvento.organizador}</span>
+                  <span>Responsable: {selectedEvento.organizador}</span>
                 </div>
               </div>
               <div className="details-body">
@@ -268,15 +273,19 @@ const ProximosEventos = () => {
                 )}
 
                 <div className="details-actions">
-                  {(isRoot ||
-                    (isAdmin &&
-                      selectedEvento.requiereCobertura &&
-                      selectedEvento.estatus?.toLowerCase() === "pendiente") ||
-                    canCreate) && (
+                  <button
+                    className="btn-edit"
+                    style={{ backgroundColor: "#6c757d", marginRight: "auto" }}
+                    onClick={() => {
+                      setViewMode("list");
+                      setSelectedEvento(null);
+                    }}
+                  >
+                    Regresar
+                  </button>
+                  {(isRoot || canCreate) && (
                     <button className="btn-edit" onClick={handleEdit}>
-                      {isAdmin && selectedEvento.requiereCobertura
-                        ? " Editar"
-                        : " Editar Evento"}
+                      Editar Evento
                     </button>
                   )}
                   {(isRoot || canCreate) && (
@@ -285,7 +294,7 @@ const ProximosEventos = () => {
                       style={{ backgroundColor: "#dc3545", marginLeft: "10px" }}
                       onClick={() => handleEliminar(selectedEvento)}
                     >
-                      🗑️ Eliminar Evento
+                      Eliminar Evento
                     </button>
                   )}
                 </div>
@@ -367,7 +376,7 @@ const ProximosEventos = () => {
                       </p>
                       {isAdmin && evento.requiereCobertura && (
                         <p style={{ color: "#ff9800", fontWeight: "bold" }}>
-                          📸 Requiere Cobertura
+                          Requiere Cobertura
                         </p>
                       )}
                       <p className="evento-desc">{evento.comentarios}</p>
@@ -408,7 +417,6 @@ const ProximosEventos = () => {
           </div>
         ) : (
           <div className="empty-events-state animation-fade-in">
-            <div className="empty-icon">📅</div>
             <h3>No hay eventos en esta vista</h3>
             <p>No se encontraron eventos con los filtros actuales.</p>
             {filterMode !== "coverage" && canCreate && (

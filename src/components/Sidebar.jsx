@@ -30,9 +30,9 @@ const Sidebar = () => {
   }, []);
 
   // Root = 1, Admin = 2, Coord = 3, Invitado = 4
-  const canViewHome = userRol === 1 || userRol === 2;
+  const canViewHome = true; // Todos los roles ven home
   const canViewEventosList = userRol === 1 || userRol === 2 || userRol === 3;
-  const canViewDashboard = userRol === 1;
+  const canViewDashboard = userRol === 1 || userRol === 3;
   const canViewAsistencia = userRol === 1 || userRol === 3 || userRol === 4;
   const canViewEncuestaInvitado = userRol === 1 || userRol === 4;
   const canViewEncuestaOrganizador = userRol === 1 || userRol === 3;

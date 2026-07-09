@@ -103,9 +103,45 @@ const ReporteEvento = () => {
       </div>
 
       <div className="info-card" style={{ marginBottom: "20px" }}>
-        <h3>Descripción y Detalles</h3>
+        <h3>Descripción y Comentarios del Evento</h3>
         <p className="info-description">{evento.descripcion}</p>
       </div>
+
+      {evento.estado === 'Cancelado' && evento.motivoCancelacion && (
+        <div className="info-card" style={{ marginBottom: "20px", borderLeft: "4px solid #ef4444" }}>
+          <h3 style={{ color: "#ef4444" }}>Motivo de Cancelación</h3>
+          <p className="info-description" style={{ fontStyle: "italic", color: "#7f1d1d" }}>
+            "{evento.motivoCancelacion}"
+          </p>
+        </div>
+      )}
+
+      {evento.comentarios && evento.comentarios.length > 0 && (
+        <div className="info-card" style={{ marginBottom: "20px" }}>
+          <h3>Comentarios de Encuestas de Satisfacción</h3>
+          {evento.comentarios.map((c, idx) => {
+            let estrellas = '';
+            if (!isNaN(c.calificacion) && c.calificacion !== 'N/A') {
+               estrellas = '⭐'.repeat(parseInt(c.calificacion));
+            }
+            return (
+              <div key={idx} style={{ marginBottom: "15px", paddingBottom: "10px", borderBottom: "1px solid #e5e7eb" }}>
+                <p style={{ margin: "0 0 5px 0", color: "#4b5563" }}>
+                  <strong>Calificación:</strong> {c.calificacion !== 'N/A' ? `${c.calificacion} ${estrellas}` : 'N/A'}
+                </p>
+                {c.recomendacion !== 'N/A' && (
+                  <p style={{ margin: "0 0 5px 0", color: "#4b5563" }}>
+                    <strong>¿Recomendaría el evento?</strong> {c.recomendacion === 'si' ? 'Sí' : c.recomendacion === 'no' ? 'No' : c.recomendacion === 'tal_vez' ? 'Tal vez' : c.recomendacion}
+                  </p>
+                )}
+                <p className="info-description" style={{ fontStyle: "italic", marginTop: "5px", color: "#1f2937" }}>
+                  "{c.comentario}"
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      )}
       
       <div className="report-actions" style={{ marginTop: "40px" }}>
         <button onClick={() => navigate(-1)} style={{ background: "white", color: "#64748b", border: "1px solid #cbd5e1", marginRight: "16px" }}>Volver Atrás</button>
