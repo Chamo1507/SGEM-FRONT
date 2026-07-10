@@ -1,58 +1,35 @@
 import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import "./ReporteEvento.css";
-
-// Datos Harcodeados expandidos para los reportes
-const eventosMockData = {
-  "1": {
-    nombre: "Conferencia Anual de Tecnología",
-    fecha: "28 Jun 2026",
-    ubicacion: "Auditorio Principal",
-    organizador: "Departamento de Sistemas",
-    asistentesEsperados: 300,
-    asistentesConfirmados: 280,
-    presupuesto: "$5,000",
-    estado: "Próximo",
-    descripcion: "La conferencia más grande del año para hablar sobre las nuevas tecnologías e innovaciones en IA y desarrollo web. Contaremos con 5 expositores internacionales."
-  },
-  "2": {
-    nombre: "Taller de Liderazgo",
-    fecha: "15 Jun 2026",
-    ubicacion: "Sala B",
-    organizador: "Recursos Humanos",
-    asistentesEsperados: 50,
-    asistentesConfirmados: 45,
-    presupuesto: "$500",
-    estado: "Completado",
-    descripcion: "Taller interactivo de liderazgo y habilidades blandas orientado a mejorar el trabajo en equipo y la resolución de conflictos."
-  },
-  "3": {
-    nombre: "Simposio de Salud Mental",
-    fecha: "05 Jul 2026",
-    ubicacion: "Auditorio Secundario",
-    organizador: "Bienestar Estudiantil",
-    asistentesEsperados: 200,
-    asistentesConfirmados: 150,
-    presupuesto: "$1,200",
-    estado: "Próximo",
-    descripcion: "Simposio de 2 días para concientizar sobre la salud mental en los estudiantes universitarios. Incluye dinámicas y paneles de expertos."
-  },
-  "4": {
-    nombre: "Feria de Emprendimiento",
-    fecha: "10 May 2026",
-    ubicacion: "Patio Central",
-    organizador: "Facultad de Negocios",
-    asistentesEsperados: 500,
-    asistentesConfirmados: 500,
-    presupuesto: "$3,000",
-    estado: "Completado",
-    descripcion: "Exposición de más de 40 proyectos de emprendimiento estudiantil. Abierto al público general con stands interactivos."
-  }
-};
 
 const ReporteEvento = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const evento = eventosMockData[id];
+  const [evento, setEvento] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchReporte = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/eventos/${id}/reporte`);
+        setEvento(response.data);
+      } catch (error) {
+        console.error("Error al obtener el reporte:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchReporte();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="report-container">
+        <h2>Cargando reporte...</h2>
+      </div>
+    );
+  }
 
   if (!evento) {
     return (
@@ -116,7 +93,7 @@ const ReporteEvento = () => {
           </div>
           <div className="info-item">
             <span className="info-label">Tasa de Asistencia:</span>
-            <span className="info-value">{Math.round((evento.asistentesConfirmados / evento.asistentesEsperados) * 100)}%</span>
+            <span className="info-value">{evento.asistentesEsperados ? Math.round((evento.asistentesConfirmados / evento.asistentesEsperados) * 100) : 0}%</span>
           </div>
           <div className="info-item">
             <span className="info-label">Presupuesto Asignado:</span>
@@ -126,9 +103,45 @@ const ReporteEvento = () => {
       </div>
 
       <div className="info-card" style={{ marginBottom: "20px" }}>
-        <h3>Descripción y Detalles</h3>
+        <h3>Descripción y Comentarios del Evento</h3>
         <p className="info-description">{evento.descripcion}</p>
       </div>
+
+      {evento.estado === 'Cancelado' && evento.motivoCancelacion && (
+        <div className="info-card" style={{ marginBottom: "20px", borderLeft: "4px solid #ef4444" }}>
+          <h3 style={{ color: "#ef4444" }}>Motivo de Cancelación</h3>
+          <p className="info-description" style={{ fontStyle: "italic", color: "#7f1d1d" }}>
+            "{evento.motivoCancelacion}"
+          </p>
+        </div>
+      )}
+
+      {evento.comentarios && evento.comentarios.length > 0 && (
+        <div className="info-card" style={{ marginBottom: "20px" }}>
+          <h3>Comentarios de Encuestas de Satisfacción</h3>
+          {evento.comentarios.map((c, idx) => {
+            let estrellas = '';
+            if (!isNaN(c.calificacion) && c.calificacion !== 'N/A') {
+               estrellas = '⭐'.repeat(parseInt(c.calificacion));
+            }
+            return (
+              <div key={idx} style={{ marginBottom: "15px", paddingBottom: "10px", borderBottom: "1px solid #e5e7eb" }}>
+                <p style={{ margin: "0 0 5px 0", color: "#4b5563" }}>
+                  <strong>Calificación:</strong> {c.calificacion !== 'N/A' ? `${c.calificacion} ${estrellas}` : 'N/A'}
+                </p>
+                {c.recomendacion !== 'N/A' && (
+                  <p style={{ margin: "0 0 5px 0", color: "#4b5563" }}>
+                    <strong>¿Recomendaría el evento?</strong> {c.recomendacion === 'si' ? 'Sí' : c.recomendacion === 'no' ? 'No' : c.recomendacion === 'tal_vez' ? 'Tal vez' : c.recomendacion}
+                  </p>
+                )}
+                <p className="info-description" style={{ fontStyle: "italic", marginTop: "5px", color: "#1f2937" }}>
+                  "{c.comentario}"
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      )}
       
       <div className="report-actions" style={{ marginTop: "40px" }}>
         <button onClick={() => navigate(-1)} style={{ background: "white", color: "#64748b", border: "1px solid #cbd5e1", marginRight: "16px" }}>Volver Atrás</button>
