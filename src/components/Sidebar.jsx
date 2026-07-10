@@ -37,7 +37,7 @@ const Sidebar = () => {
   const canViewEncuestaInvitado = userRol === 1 || userRol === 4;
   const canViewEncuestaOrganizador = userRol === 1 || userRol === 3;
   const canViewConfiguracion = userRol === 1 || userRol === 2;
-  const canViewInventario = userRol === 1 || userRol === 2 || userRol === 3 || userRol === 4;
+  const canViewInventario = userRol === 1 || userRol === 2;
   const canViewProveedores = userRol === 1 || userRol === 2 || userRol === 3 || userRol === 4;
 
   return (

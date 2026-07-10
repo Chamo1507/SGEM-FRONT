@@ -11,6 +11,10 @@ const Inventario = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user.id_rol > 2) {
+      window.location.href = '/home';
+    }
     fetchMateriales();
   }, []);
 

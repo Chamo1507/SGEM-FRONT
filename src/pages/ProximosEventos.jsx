@@ -23,9 +23,12 @@ const ProximosEventos = () => {
 
   const fetchEventos = async () => {
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/eventos`,
-      );
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const url = user.id_rol === 3 
+        ? `${import.meta.env.VITE_API_URL}/eventos?id_usuario=${user.id_usuario}`
+        : `${import.meta.env.VITE_API_URL}/eventos`;
+
+      const response = await axios.get(url);
 
       const fetchedEventos = response.data.map((ev) => ({
         id: ev.id_evento,

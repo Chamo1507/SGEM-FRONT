@@ -8,7 +8,8 @@ import Btn from '../components/btn';
 import './ConfirmarAsistencia.css';
 
 const ConfirmarAsistencia = () => {
-  const { register, handleSubmit, formState: { errors }, reset } = useForm();
+  const { register, handleSubmit, formState: { errors }, reset, watch } = useForm();
+  const tipoInvitado = watch('tipoInvitado');
   const [opcEventos, setOpcEventos] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -71,23 +72,38 @@ const ConfirmarAsistencia = () => {
               {...register('nombre', { required: 'Tu nombre es obligatorio' })}
             />
 
-            <div className="form-row">
-              <Input
-                label="Semestre"
-                type="number"
-                placeholder="Ej.: 6"
-                required={true}
-                error={errors.semestre?.message}
-                {...register('semestre', { required: 'Ingresa tu semestre' })}
-              />
-              <Input
-                label="Carrera"
-                placeholder="Ej.: Ing. Sistemas"
-                required={true}
-                error={errors.carrera?.message}
-                {...register('carrera', { required: 'Ingresa tu carrera' })}
-              />
-            </div>
+            <Select
+              label="Tipo de Invitado"
+              options={[
+                { value: '', label: 'Selecciona una opción' },
+                { value: 'Administrativo', label: 'Administrativo' },
+                { value: 'alumno', label: 'Alumno' },
+                { value: 'externo', label: 'Externo' }
+              ]}
+              required={true}
+              error={errors.tipoInvitado?.message}
+              {...register('tipoInvitado', { required: 'Por favor selecciona un tipo de invitado' })}
+            />
+
+            {tipoInvitado === 'alumno' && (
+              <div className="form-row">
+                <Input
+                  label="Semestre"
+                  type="number"
+                  placeholder="Ej.: 6"
+                  required={true}
+                  error={errors.semestre?.message}
+                  {...register('semestre', { required: 'Ingresa tu semestre' })}
+                />
+                <Input
+                  label="Carrera"
+                  placeholder="Ej.: Ing. Sistemas"
+                  required={true}
+                  error={errors.carrera?.message}
+                  {...register('carrera', { required: 'Ingresa tu carrera' })}
+                />
+              </div>
+            )}
 
             <div className="confirm-checkbox">
               <Input
